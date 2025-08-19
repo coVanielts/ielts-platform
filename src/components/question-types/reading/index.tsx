@@ -1,0 +1,11 @@
+export { default as Matching } from './Matching'
+export { default as MatchingLettersDragDrop } from './MatchingLettersDragDrop'
+export { default as MultipleChoiceMultipleAnswers } from './MultipleChoiceMultipleAnswers'
+export { default as ParagraphOrdering } from './ParagraphOrdering'
+export { default as ReadingComprehension } from './ReadingComprehension'
+export { default as ReadingMultipleChoiceQuestion } from './ReadingMultipleChoiceQuestion'
+export { default as SentenceTransformation } from './SentenceTransformation'
+export { default as TrueFalseNotGivenQuestion } from './TrueFalseNotGivenQuestion'
+export { default as WordFormation } from './WordFormation'
+export { default as WordGap } from './WordGap'
+
