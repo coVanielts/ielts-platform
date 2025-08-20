@@ -48,6 +48,8 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
   const [reviewTimeRemaining, setReviewTimeRemaining] = useState(120)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isTimerPaused, setIsTimerPaused] = useState(true) // Timer starts paused
+  const [userConfirmedAudio, setUserConfirmedAudio] = useState(false)
   // Load test and auto-start
   useEffect(() => {
     const load = async () => {
@@ -82,7 +84,16 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         timeLimit: (transformed as any).timeLimit || raw.time_limit || 60,
         parts: (transformed as any).parts || [],
         questionGroups: (transformed as any).questionGroups || [],
+        isPractice: raw.is_practice_test || false, // Add practice test check
         ...(type === 'listening' ? { audioUrl: (transformed as any).audioUrl } : {}),
+      })
+
+      // Debug log for practice test status
+      console.log('Test loaded:', {
+        name: raw.name,
+        type: raw.type,
+        is_practice_test: raw.is_practice_test,
+        isPractice: raw.is_practice_test || false
       })
 
       setStartTime(new Date())
@@ -129,6 +140,12 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
       const initialTime = (testData.timeLimit || 60) * 60
       setTimeRemaining(initialTime)
       timeRemainingRef.current = initialTime
+    }
+
+    // For non-listening tests, start timer immediately
+    if (String(testData.type).toLowerCase() !== 'listening') {
+      setIsTimerPaused(false)
+      setUserConfirmedAudio(true)
     }
 
     setProgressInitialized(true)
@@ -215,7 +232,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
 
   // Timers
   useEffect(() => {
-    if (startTime && timeRemaining > 0) {
+    if (startTime && timeRemaining > 0 && !isTimerPaused) {
       const timer = setInterval(() => {
         setTimeRemaining(prev => {
           const newValue = prev - 1
@@ -233,7 +250,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
       }, 1000)
       return () => clearInterval(timer)
     }
-  }, [startTime, timeRemaining, handleConfirmSubmit])
+  }, [startTime, timeRemaining, isTimerPaused, handleConfirmSubmit])
 
   useEffect(() => {
     if (reviewTimeStarted && reviewTimeRemaining > 0) {
@@ -389,6 +406,11 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
     setReviewTimeStarted(true)
   }
 
+  const handleAudioConfirm = () => {
+    setUserConfirmedAudio(true)
+    setIsTimerPaused(false) // Resume timer when user confirms
+  }
+
   const scrollToQuestion = (questionNumber: number) => {
     const element = document.getElementById(`question-${questionNumber}`)
     if (element) {
@@ -473,7 +495,14 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
                 Back to Dashboard
               </Link>
               <div>
-                <h1 className="text-lg font-semibold text-neutral-900">{testData.title}</h1>
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-lg font-semibold text-neutral-900">{testData.title}</h1>
+                  {testData.isPractice && (
+                    <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                      Practice
+                    </span>
+                  )}
+                </div>
                 {testData.type !== 'speaking' && String(testData.instruction || '')?.trim().length > 0 && (
                   <p className="text-sm text-neutral-600">{testData.instruction}</p>
                 )}
@@ -492,6 +521,9 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
                 <Clock className="w-4 h-4 text-neutral-600" />
                 <span className={timeRemaining < 300 ? 'text-red-600 font-medium' : 'text-neutral-600'}>
                   {formatTime(timeRemaining)}
+                  {isListening && isTimerPaused && !userConfirmedAudio && (
+                    <span className="ml-2 text-xs text-orange-600 font-medium">(Paused)</span>
+                  )}
                 </span>
               </div>
               <button onClick={handleSubmit} className="btn btn-primary btn-sm">
@@ -510,6 +542,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
               audioRef={audioRef}
               audioUrl={fetchAudioFromDirectus(testData.audioUrl)}
               onEnd={handleListeningEnd}
+              onAudioConfirm={handleAudioConfirm}
               disableControls={!testData.isPractice}
               initialAudioTime={progress?.remaining_audio_time || undefined}
             />
