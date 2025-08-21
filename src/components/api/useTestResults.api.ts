@@ -50,9 +50,10 @@ export const TEST_RESULTS_QUERY_KEY = 'test-results'
 interface FetchTestResultsParams {
   testId: string
   attemptNumber?: number
+  testGroupId?: string
 }
 
-const fetchTestResults = async ({ testId, attemptNumber }: FetchTestResultsParams): Promise<TestResult | null> => {
+const fetchTestResults = async ({ testId, attemptNumber, testGroupId }: FetchTestResultsParams): Promise<TestResult | null> => {
   try {
     // Initialize Directus client
     const directus = await initializeDirectus()
@@ -106,14 +107,19 @@ const fetchTestResults = async ({ testId, attemptNumber }: FetchTestResultsParam
     }
 
     // Fetch results from Directus
-    const filter = {
+    const filter: any = {
       test: { _eq: parseInt(testId) },
       student: { _eq: userId },
     }
 
+    // Add test group filter if specified
+    if (testGroupId) {
+      filter.test_group = { _eq: parseInt(testGroupId) }
+    }
+
     // Add attempt filter if specified
     if (attemptNumber !== undefined) {
-      Object.assign(filter, { attempt: { _eq: attemptNumber } })
+      filter.attempt = { _eq: attemptNumber }
     }
 
     const resultsData = (await directus.request(
@@ -261,10 +267,10 @@ const fetchTestResults = async ({ testId, attemptNumber }: FetchTestResultsParam
   }
 }
 
-export function useTestResults(testId: string, attemptNumber?: number) {
+export function useTestResults(testId: string, attemptNumber?: number, testGroupId?: string) {
   return useQuery({
-    queryKey: [TEST_RESULTS_QUERY_KEY, testId, attemptNumber],
-    queryFn: () => fetchTestResults({ testId, attemptNumber }),
+    queryKey: [TEST_RESULTS_QUERY_KEY, testId, attemptNumber, testGroupId],
+    queryFn: () => fetchTestResults({ testId, attemptNumber, testGroupId }),
     enabled: !!testId,
   })
 }
