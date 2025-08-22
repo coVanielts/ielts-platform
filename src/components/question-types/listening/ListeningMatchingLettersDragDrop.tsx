@@ -20,6 +20,16 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import React, { useState } from 'react'
 
+// Helper function to get letter label (A, B, C, D, ...)
+const getLetterLabel = (index: number): string => {
+  return String.fromCharCode(65 + index); // 65 is ASCII for 'A'
+}
+
+// Helper function to get display text with letter prefix
+const getDisplayText = (letter: string, index: number): string => {
+  return `${getLetterLabel(index)}. ${letter}`;
+}
+
 interface ListeningMatchingLettersDragDropProps {
   questionRange?: string
   instructions?: string
@@ -156,13 +166,17 @@ const ListeningMatchingLettersDragDrop: React.FC<ListeningMatchingLettersDragDro
       const question = questions[questionIndex]
       
       if (question && onAnswerChange) {
+        // Find the index of the dragged letter in the original letters array
+        const letterIndex = letters.findIndex(letter => letter === activeId)
+        const letterAnswer = letterIndex !== -1 ? getLetterLabel(letterIndex) : activeId
+        
         // Remove from previous question if it was already assigned
         const previousQuestionId = Object.keys(selectedAnswers).find(
-          key => selectedAnswers[key] === activeId
+          key => selectedAnswers[key] === letterAnswer
         )
         
-        // Update the answer for this question
-        onAnswerChange(question.id, activeId)
+        // Update the answer for this question with letter (A, B, C, D)
+        onAnswerChange(question.id, letterAnswer)
         
         // If the letter was previously assigned to another question, clear that assignment
         if (previousQuestionId && previousQuestionId !== question.id) {
@@ -173,8 +187,11 @@ const ListeningMatchingLettersDragDrop: React.FC<ListeningMatchingLettersDragDro
     // If dropping back to available letters area
     else if (overId === 'available-letters') {
       // Find which question this letter was assigned to and clear it
+      const letterIndex = letters.findIndex(letter => letter === activeId)
+      const letterAnswer = letterIndex !== -1 ? getLetterLabel(letterIndex) : activeId
+      
       const assignedQuestionId = Object.keys(selectedAnswers).find(
-        key => selectedAnswers[key] === activeId
+        key => selectedAnswers[key] === letterAnswer
       )
       
       if (assignedQuestionId && onAnswerChange) {
@@ -192,7 +209,10 @@ const ListeningMatchingLettersDragDrop: React.FC<ListeningMatchingLettersDragDro
   // If we have equal or fewer questions, remove assigned letters from available pool
   const unassignedLetters = hasMoreQuestionsThanLetters 
     ? letters // Keep all letters available for reuse
-    : letters.filter(letter => !Object.values(selectedAnswers).includes(letter))
+    : letters.filter((letter, index) => {
+        const letterAnswer = getLetterLabel(index);
+        return !Object.values(selectedAnswers).includes(letterAnswer);
+      })
 
   // Compute display range if not provided
   const displayRange = (() => {
@@ -222,11 +242,15 @@ const ListeningMatchingLettersDragDrop: React.FC<ListeningMatchingLettersDragDro
           <SortableContext items={unassignedLetters} strategy={verticalListSortingStrategy}>
             <DroppableZone id="available-letters" answer="">
               <div className="grid grid-cols-2 gap-2 p-2 bg-gray-50 rounded-md border-2 border-dashed border-gray-300">
-                {unassignedLetters.map(letter => (
-                  <DraggableItem key={letter} id={letter}>
-                    {letter}
-                  </DraggableItem>
-                ))}
+                {unassignedLetters.map((letter, index) => {
+                  const originalIndex = letters.findIndex(l => l === letter);
+                  const displayText = getDisplayText(letter, originalIndex);
+                  return (
+                    <DraggableItem key={letter} id={letter}>
+                      {displayText}
+                    </DraggableItem>
+                  );
+                })}
               </div>
             </DroppableZone>
           </SortableContext>
@@ -266,7 +290,22 @@ const ListeningMatchingLettersDragDrop: React.FC<ListeningMatchingLettersDragDro
 
                   {/* Drop Zone */}
                   <div className="flex-shrink-0 w-36">
-                    <DroppableZone id={`question-${index}`} answer={assignedLetter} />
+                    <DroppableZone 
+                      id={`question-${index}`} 
+                      answer={assignedLetter ? (() => {
+                        // Find the letter text and index to display properly
+                        const letterIndex = letters.findIndex(letter => getLetterLabel(letters.indexOf(letter)) === assignedLetter);
+                        if (letterIndex !== -1) {
+                          return getDisplayText(letters[letterIndex], letterIndex);
+                        }
+                        // Fallback: if letter not found, try to find by matching the letter answer directly
+                        const directIndex = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].indexOf(assignedLetter);
+                        if (directIndex !== -1 && letters[directIndex]) {
+                          return getDisplayText(letters[directIndex], directIndex);
+                        }
+                        return assignedLetter;
+                      })() : ''} 
+                    />
                   </div>
                 </div>
               </div>
@@ -278,7 +317,10 @@ const ListeningMatchingLettersDragDrop: React.FC<ListeningMatchingLettersDragDro
         <DragOverlay>
           {activeId ? (
             <DraggableItem id={activeId} isOverlay>
-              {activeId}
+              {(() => {
+                const letterIndex = letters.findIndex(letter => letter === activeId);
+                return letterIndex !== -1 ? getDisplayText(activeId, letterIndex) : activeId;
+              })()}
             </DraggableItem>
           ) : null}
         </DragOverlay>
