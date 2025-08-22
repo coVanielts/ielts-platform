@@ -51,9 +51,9 @@ export default function FullTestResultsPage() {
   const writingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'writing')?.tests_id?.id
 
   // Fetch results for each individual test
-  const { data: listeningResult } = useTestResults(listeningTestId?.toString() || '', undefined)
-  const { data: readingResult } = useTestResults(readingTestId?.toString() || '', undefined)
-  const { data: writingResult } = useTestResults(writingTestId?.toString() || '', undefined)
+  const { data: listeningResult } = useTestResults(listeningTestId?.toString() || '', undefined, params.id as string)
+  const { data: readingResult } = useTestResults(readingTestId?.toString() || '', undefined, params.id as string)
+  const { data: writingResult } = useTestResults(writingTestId?.toString() || '', undefined, params.id as string)
 
   useEffect(() => {
     if (!groupLoading && testGroupData) {

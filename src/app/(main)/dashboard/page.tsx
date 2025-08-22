@@ -130,13 +130,15 @@ export default function DashboardPage() {
   // Shows quick status (completed/pending), score/band if available, and a direct action
   const IncludedTestItem = ({
     test,
+    testGroupId,
   }: {
     test: { id: string | number; name: string; type: string; time_limit?: number }
+    testGroupId: string
   }) => {
     // Lazy import to avoid top-level dependency if not used
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { useTestResults } = require('@/components/api/useTestResults.api')
-    const { data: result, isLoading } = useTestResults(String(test.id))
+    const { data: result, isLoading } = useTestResults(String(test.id), undefined, testGroupId)
 
     const hasResult = !!result
     const bandOrPercent = result?.bandScore ?? result?.percentage
@@ -372,12 +374,12 @@ export default function DashboardPage() {
                                 </span>
                               </div>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                            {/* <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
                               <div
                                 className="bg-green-500 h-2 rounded-full transition-all duration-300"
                                 style={{ width: `${progress.percentage}%` }}></div>
-                            </div>
-                            <p className="text-xs text-neutral-500">{progress.text}</p>
+                            </div> */}
+                            {/* <p className="text-xs text-neutral-500">{progress.text}</p> */}
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -385,17 +387,17 @@ export default function DashboardPage() {
                             <FileText className="w-4 h-4 mr-2" />
                             View Full Results
                           </Link>
-                          <Link href={`/test/full/${group.id}`} className="btn btn-primary">
-                            <Play className="w-4 h-4 mr-2" />
-                            {progress.percentage === 100 ? 'Review' : 'Start Full Test'}
-                          </Link>
+                            <Link href={`/test/full/${group.id}`} className="btn btn-primary">
+                              <Play className="w-4 h-4 mr-2" />
+                              {progress.percentage === 100 ? 'Review' : 'Start Full Test'}
+                            </Link>
                         </div>
                       </div>
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Included Tests</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                           {group.tests.map(test => (
-                            <IncludedTestItem key={test.id} test={test} />
+                            <IncludedTestItem key={test.id} test={test} testGroupId={group.id} />
                           ))}
                         </div>
                       </div>

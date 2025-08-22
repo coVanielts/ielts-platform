@@ -70,10 +70,10 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Question Header */}
       {(questionRange || instructions) && (
-        <div className="bg-gray-50 border-b border-gray-200 p-3 rounded-t-lg">
+        <div className="bg-gray-50 border-b border-gray-200 p-2 rounded-t-lg">
           <div className="flex items-start justify-between">
             <div>
-              {questionRange && <h3 className="text-md font-medium text-gray-900 mb-1">{questionRange}</h3>}
+              {questionRange && <h3 className="text-sm font-medium text-gray-900 mb-1">{questionRange}</h3>}
               {instructions && (
                 <div className="text-gray-600 text-xs">
                   <HighlightableText text={instructions} enableInternalHighlight />
@@ -88,12 +88,12 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
       )}
 
       {/* Content */}
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-2">
         {extract && (
-          <div className="bg-neutral-50 p-3 rounded-lg">
+          <div className="bg-neutral-50 p-2 rounded-lg">
             <HighlightableText
               text={extract.context}
-              className="text-neutral-700 text-sm block"
+              className="text-neutral-700 text-xs block"
               onHighlight={handleHighlight}
             />
           </div>
@@ -109,14 +109,14 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
                   { id: 'C', text: 'Option C' },
                 ]
           return (
-            <div key={question.id} className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div key={question.id} className="bg-white border border-neutral-200 rounded-lg p-2">
               {/* Question Header */}
-              <div className="flex items-start space-x-3 mb-3">
-                <span className="inline-flex items-center justify-center w-5 h-5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+              <div className="flex items-start space-x-2 mb-2">
+                <span className="inline-flex items-center justify-center w-5 h-5 bg-green-100 text-green-700 text-xs font-medium rounded-full flex-shrink-0">
                   {question.questionNumber}
                 </span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs text-neutral-600 font-medium">Multiple Choice</span>
                     </div>
@@ -124,12 +124,12 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
                   {question.questionDoc ? (
                     <RichTextViewer
                       content={question.questionDoc}
-                      className="select-text cursor-text reading-passage text-neutral-900 text-sm font-medium block"
+                      className="select-text cursor-text reading-passage text-neutral-900 text-xs font-medium block leading-tight"
                     />
                   ) : (
                     <HighlightableText
                       text={question.question}
-                      className="text-neutral-900 text-sm font-medium block"
+                      className="text-neutral-900 text-xs font-medium block leading-tight"
                       onHighlight={handleHighlight}
                     />
                   )}
@@ -137,11 +137,11 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
               </div>
 
               {/* Options */}
-              <div className="space-y-2 ml-8">
+              <div className="space-y-1 ml-7">
                 {choices.map((choice, index) => (
                   <label
                     key={choice.id}
-                    className={`flex items-start space-x-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                    className={`flex items-start space-x-2 p-1.5 rounded-md border cursor-pointer transition-colors ${
                       selectedAnswers[question.id] === choice.id
                         ? 'border-primary-500 bg-primary-50'
                         : 'border-neutral-200 hover:border-primary-300 hover:bg-primary-25'
@@ -157,12 +157,12 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
                         disabled={isReadOnly}
                         className="mt-0.5 h-3 w-3 text-primary-600 focus:ring-primary-500 border-neutral-300"
                       />
-                      <span className="w-5 h-5 flex items-center justify-center bg-neutral-100 rounded-full text-xs font-medium text-neutral-600">
+                      <span className="w-5 h-5 flex items-center justify-center bg-neutral-100 rounded-full text-xs font-medium text-neutral-600 flex-shrink-0">
                         {String.fromCharCode(65 + index)}
                       </span>
                     </div>
-                    <div className="flex-1">
-                      <span className="text-neutral-900 text-sm">{choice.text}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-neutral-900 text-xs leading-tight">{choice.text}</span>
                     </div>
                   </label>
                 ))}

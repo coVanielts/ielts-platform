@@ -20,7 +20,7 @@ module.exports = {
       {
         protocol: 'https',
         hostname: 'ielts-admin-7ic7j.ondigitalocean.app',
-        pathname: '//assets/**',
+        pathname: '/**',
       },
     ],
   },
