@@ -17,6 +17,11 @@ module.exports = {
         port: '8055',
         pathname: '//assets/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ielts-admin-7ic7j.ondigitalocean.app',
+        pathname: '//assets/**',
+      },
     ],
   },
 }
