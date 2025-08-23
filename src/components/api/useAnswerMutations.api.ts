@@ -11,6 +11,7 @@ type UpsertAnswerParams = {
   answer: unknown
   attachment?: string
   writing_submission?: string
+  testGroupId?: number
 }
 
 async function upsertAnswer({
@@ -21,6 +22,7 @@ async function upsertAnswer({
   answer,
   attachment,
   writing_submission,
+  testGroupId,
 }: UpsertAnswerParams) {
   try {
     const directus = await initializeDirectus()
@@ -32,6 +34,7 @@ async function upsertAnswer({
           student: { _eq: studentId },
           attempt: { _eq: attempt },
           question: { _eq: questionId },
+          ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
         },
         limit: 1,
         fields: ['id'],
@@ -48,6 +51,7 @@ async function upsertAnswer({
       createItem('answers', {
         test: testId,
         student: studentId,
+        test_group: testGroupId,
         attempt,
         question: questionId,
         answers: [answer],

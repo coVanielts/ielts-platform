@@ -32,17 +32,19 @@ export default function FullTestPage() {
   const [showReadingInstructions, setShowReadingInstructions] = useState(false)
   const [showWritingInstructions, setShowWritingInstructions] = useState(false)
 
+  const testGroupId = params.id as string
+
   // Fetch test group data
-  const { data: testGroupData, isLoading, error } = useTestGroupDetail(params.id as string)
+  const { data: testGroupData, isLoading, error } = useTestGroupDetail(testGroupId)
 
   // Get progress for individual tests to determine current skill
   const listeningTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'listening')?.tests_id?.id
   const readingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'reading')?.tests_id?.id
   const writingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'writing')?.tests_id?.id
 
-  const { data: listeningProgress } = useGetProgress(listeningTestId, studentId)
-  const { data: readingProgress } = useGetProgress(readingTestId, studentId)
-  const { data: writingProgress } = useGetProgress(writingTestId, studentId)
+  const { data: listeningProgress } = useGetProgress(listeningTestId, studentId, parseInt(testGroupId))
+  const { data: readingProgress } = useGetProgress(readingTestId, studentId, parseInt(testGroupId))
+  const { data: writingProgress } = useGetProgress(writingTestId, studentId, parseInt(testGroupId))
 
   const { mutate: deleteProgress } = useDeleteProgress()
 
@@ -85,7 +87,7 @@ export default function FullTestPage() {
 
     // Delete listening progress when moving to reading
     if (studentId && listeningTestId) {
-      deleteProgress({ testId: listeningTestId, studentId })
+      deleteProgress({ testId: listeningTestId, studentId, testGroupId: parseInt(testGroupId) })
     }
   }
 
@@ -95,7 +97,7 @@ export default function FullTestPage() {
 
     // Delete reading progress when moving to writing
     if (studentId && readingTestId) {
-      deleteProgress({ testId: readingTestId, studentId })
+      deleteProgress({ testId: readingTestId, studentId, testGroupId: parseInt(testGroupId) })
     }
   }
 
@@ -298,6 +300,7 @@ export default function FullTestPage() {
               setCurrentSection('reading')
               setShowReadingInstructions(true)
             }}
+            testGroupId={parseInt(testGroupId)}
           />
         ) : currentSection === 'reading' && readingTestId ? (
           <TestRunnerWithoutInstructions
@@ -307,6 +310,7 @@ export default function FullTestPage() {
               setCurrentSection('writing')
               setShowWritingInstructions(true)
             }}
+            testGroupId={parseInt(testGroupId)}
           />
         ) : currentSection === 'writing' && writingTestId ? (
           <TestRunnerWithoutInstructions
@@ -315,11 +319,12 @@ export default function FullTestPage() {
               setWritingCompleted(true)
               // Delete writing progress when completed
               if (studentId && writingTestId) {
-                deleteProgress({ testId: writingTestId, studentId })
+                deleteProgress({ testId: writingTestId, studentId, testGroupId: parseInt(testGroupId) })
               }
               // Navigate to results page
               router.push(`/test/full/${params.id}/results`)
             }}
+            testGroupId={parseInt(testGroupId)}
           />
         ) : (
           // Fallback content

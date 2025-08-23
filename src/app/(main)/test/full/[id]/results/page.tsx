@@ -5,7 +5,7 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { useTestGroupDetail } from '@/hooks/useTestGroupDetail'
 import { ArrowLeft, Award, BarChart3, BookOpen, Headphones, PenTool, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 interface FullTestResult {
@@ -39,21 +39,25 @@ interface FullTestResult {
 
 export default function FullTestResultsPage() {
   const params = useParams()
-  const router = useRouter()
   const [fullTestResult, setFullTestResult] = useState<FullTestResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const testGroupId = params.id as string
   // Fetch test group data to get individual test IDs
-  const { data: testGroupData, isLoading: groupLoading } = useTestGroupDetail(params.id as string)
+  const { data: testGroupData, isLoading: groupLoading } = useTestGroupDetail(testGroupId)
 
   const listeningTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'listening')?.tests_id?.id
   const readingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'reading')?.tests_id?.id
   const writingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'writing')?.tests_id?.id
 
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+  const attemptParam = searchParams.get('attempt')
+  const attemptNumber = attemptParam ? parseInt(attemptParam) : undefined
+
   // Fetch results for each individual test
-  const { data: listeningResult } = useTestResults(listeningTestId?.toString() || '', undefined)
-  const { data: readingResult } = useTestResults(readingTestId?.toString() || '', undefined)
-  const { data: writingResult } = useTestResults(writingTestId?.toString() || '', undefined)
+  const { data: listeningResult } = useTestResults(listeningTestId?.toString() ?? '', testGroupId, attemptNumber)
+  const { data: readingResult } = useTestResults(readingTestId?.toString() ?? '', testGroupId, attemptNumber)
+  const { data: writingResult } = useTestResults(writingTestId?.toString() ?? '', testGroupId, attemptNumber)
 
   useEffect(() => {
     if (!groupLoading && testGroupData) {

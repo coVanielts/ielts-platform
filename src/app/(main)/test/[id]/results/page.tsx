@@ -17,10 +17,11 @@ export default function TestResultsPage() {
   // Get attempt from query params if available
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
   const attemptParam = searchParams.get('attempt')
+  const testGroupIdParam = searchParams.get('testGroupId') ?? undefined
   const attemptNumber = attemptParam ? parseInt(attemptParam) : undefined
 
   // Use React Query hook to fetch test results
-  const { data: results, isLoading, error: queryError } = useTestResults(testId, attemptNumber)
+  const { data: results, isLoading, error: queryError } = useTestResults(testId, testGroupIdParam, attemptNumber)
 
   // Animation effect for showing content
   useEffect(() => {

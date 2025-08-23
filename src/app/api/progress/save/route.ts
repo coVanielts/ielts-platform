@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { testId, studentId, remainingTime, remainingAudioTime, currentPart } = body
+    const { testId, testGroupId, studentId, remainingTime, remainingAudioTime, currentPart } = body
 
     if (!testId || !studentId || typeof remainingTime !== 'number') {
       return NextResponse.json({ error: 'Missing required fields: testId, studentId, remainingTime' }, { status: 400 })
@@ -32,7 +32,11 @@ export async function POST(request: NextRequest) {
     // Check if progress record exists
     const existing = await directus.request(
       readItems('tests_progress', {
-        filter: { test: { _eq: testId }, student: { _eq: studentId } },
+        filter: {
+          test: { _eq: testId },
+          student: { _eq: studentId },
+          ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
+        },
         limit: 1,
         fields: ['id', 'remaining_time', 'remaining_audio_time', 'current_part'],
       }),
@@ -88,6 +92,7 @@ export async function POST(request: NextRequest) {
           test: testId,
           student: studentId,
           remaining_time: remainingTime,
+          test_group: testGroupId,
           ...(remainingAudioTime !== undefined && { remaining_audio_time: remainingAudioTime }),
           ...(currentPart !== undefined && { current_part: currentPart }),
         }),

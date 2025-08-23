@@ -6,4 +6,5 @@ export const appPaths = {
   forgotPassword: '/forgot-password',
   profile: '/profile',
   tests: '/test',
+  fullTests: '/test/full',
 }

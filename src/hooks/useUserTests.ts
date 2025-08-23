@@ -104,97 +104,10 @@ const fetchUserTests = async (): Promise<UserTest[]> => {
       status: 'assigned' as const,
       assignedDate: test.date_created || new Date().toISOString(),
       dueDate: test.due_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      duration: test.time_limit || 60,
-      totalQuestions: 40, // Default value, will be updated if we have permission
-      maxScore: 40, // Default value
+      duration: test.time_limit || 30,
+      totalQuestions: 40,
+      maxScore: 40,
     }))
-
-    // TODO: Commented out due to permission issues
-    // Get question count for each test in batch to reduce API calls
-    /*
-    const allTestParts = await directus.request(
-      readItems('tests_test_parts', {
-        filter: {
-          tests_id: { _in: testIds },
-        },
-      })
-    )
-
-    // Group test parts by test ID
-    const testPartsMap = new Map<number, number[]>()
-    allTestParts.forEach(tp => {
-      if (tp.tests_id && tp.test_parts_id) {
-        if (!testPartsMap.has(tp.tests_id)) {
-          testPartsMap.set(tp.tests_id, [])
-        }
-        testPartsMap.get(tp.tests_id)!.push(tp.test_parts_id)
-      }
-    })
-
-    // Get all question groups for all test parts
-    const allTestPartIds = Array.from(new Set(allTestParts.map(tp => tp.test_parts_id).filter(id => id !== null && id !== undefined))) as number[]
-    
-    if (allTestPartIds.length > 0) {
-      const allQuestionGroups = await directus.request(
-        readItems('test_parts_question_groups', {
-          filter: {
-            test_parts_id: { _in: allTestPartIds },
-          },
-        })
-      )
-
-      // Group question groups by test part ID
-      const questionGroupsMap = new Map<number, number[]>()
-      allQuestionGroups.forEach(qg => {
-        if (qg.test_parts_id && qg.question_groups_id) {
-          if (!questionGroupsMap.has(qg.test_parts_id)) {
-            questionGroupsMap.set(qg.test_parts_id, [])
-          }
-          questionGroupsMap.get(qg.test_parts_id)!.push(qg.question_groups_id)
-        }
-      })
-
-      // Get all questions for all question groups
-      const allQuestionGroupIds = Array.from(new Set(allQuestionGroups.map(qg => qg.question_groups_id).filter(id => id !== null && id !== undefined))) as number[]
-      
-      if (allQuestionGroupIds.length > 0) {
-        const allQuestions = await directus.request(
-          readItems('questions', {
-            filter: {
-              question_group: { _in: allQuestionGroupIds },
-            },
-          })
-        )
-
-        // Count questions by question group
-        const questionCountMap = new Map<number, number>()
-        allQuestions.forEach(q => {
-          if (q.question_group && typeof q.question_group === 'number') {
-            questionCountMap.set(q.question_group, (questionCountMap.get(q.question_group) || 0) + 1)
-          }
-        })
-
-        // Calculate total questions for each test
-        userTests.forEach(test => {
-          const testId = parseInt(test.id)
-          const testPartIds = testPartsMap.get(testId) || []
-          let totalQuestions = 0
-
-          testPartIds.forEach(testPartId => {
-            const questionGroupIds = questionGroupsMap.get(testPartId) || []
-            questionGroupIds.forEach(qgId => {
-              totalQuestions += questionCountMap.get(qgId) || 0
-            })
-          })
-
-          if (totalQuestions > 0) {
-            test.totalQuestions = totalQuestions
-            test.maxScore = totalQuestions
-          }
-        })
-      }
-    }
-    */
 
     // Get progress and results for each test to determine status
     for (const test of userTests) {
@@ -210,6 +123,7 @@ const fetchUserTests = async (): Promise<UserTest[]> => {
             filter: {
               student: { _eq: userId },
               test: { _eq: parseInt(test.id) },
+              test_group: { _null: true },
             },
             limit: 1,
           }),
@@ -226,6 +140,7 @@ const fetchUserTests = async (): Promise<UserTest[]> => {
             filter: {
               student: { _eq: userId },
               test: { _eq: parseInt(test.id) },
+              test_group: { _null: true },
             },
             limit: 1,
           }),
@@ -252,11 +167,5 @@ export function useUserTests() {
   return useQuery({
     queryKey: [USER_TESTS_QUERY_KEY],
     queryFn: fetchUserTests,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
-    keepPreviousData: true, // This helps prevent flickering
   })
 }

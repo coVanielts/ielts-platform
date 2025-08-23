@@ -9,6 +9,7 @@ export type Answers = {
   student?: string | DirectusUsers | null
   test?: number | Tests | null
   writing_submission?: string | null
+  test_group?: number | TestGroups | null
 }
 
 export type AnswersFiles = {
@@ -516,6 +517,7 @@ export type Results = {
   task_2_LR?: number | null
   task_2_TA?: number | null
   test?: number | Tests | null
+  test_group?: number | TestGroups | null
   time_spent?: number | null
   type?: string | null
   writing: string

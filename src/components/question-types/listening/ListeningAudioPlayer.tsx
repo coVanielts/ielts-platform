@@ -30,6 +30,8 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
   const [userConfirmed, setUserConfirmed] = useState(false)
   const [isSeeking, setIsSeeking] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [hasInitiallyPlayed, setHasInitiallyPlayed] = useState(false)
   const seekTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Use the audio hook to handle Directus audio fetching from Directus assets
@@ -42,15 +44,29 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
   }
 
   const handlePlay = () => {
+    console.log('handlePlay called, isPlaying:', isPlaying, 'userConfirmed:', userConfirmed, 'disableControls:', disableControls)
     if (audioRef.current && userConfirmed) {
       if (!isPlaying) {
-        audioRef.current.play()
-        setIsPlaying(true)
-        setShowContinueDialog(false) // Hide dialog when user starts playing
-      } else if (!disableControls) {
-        audioRef.current.pause()
-        setIsPlaying(false)
+        console.log('Attempting to play audio')
+        audioRef.current.play().then(() => {
+          console.log('Audio play succeeded')
+          setIsPlaying(true)
+          setShowContinueDialog(false)
+        }).catch((error) => {
+          console.error('Audio play failed:', error)
+        })
+      } else {
+        // Only allow pause in practice mode (when disableControls is false)
+        if (!disableControls) {
+          console.log('Attempting to pause audio (practice mode)')
+          audioRef.current.pause()
+          setIsPlaying(false)
+        } else {
+          console.log('Pause not allowed in test mode')
+        }
       }
+    } else {
+      console.log('Cannot play - audioRef or userConfirmed not ready')
     }
   }
 
@@ -124,17 +140,23 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     console.log('comeeee1')
 
     const handleReady = () => {
-      const duration = audio.duration || 0
+      const audioDuration = audio.duration || 0
       const offset = initialAudioTime || 0
-      console.log(duration, offset)
-
+      console.log('handleReady - duration:', audioDuration, 'offset:', offset)
+      
+      setDuration(audioDuration) // Set duration state
+      
       if (offset === 0) return
-      audio.currentTime = Math.max(0, duration - offset)
+      audio.currentTime = Math.max(0, audioDuration - offset)
       setCurrentTime(audio.currentTime) // Update state when setting initial time
       setIsAudioReady(true)
     }
 
     const handleCanPlay = () => {
+      const audioDuration = audio.duration || 0
+      console.log('handleCanPlay - duration:', audioDuration)
+      
+      setDuration(audioDuration) // Set duration state
       setIsAudioReady(true)
       setCurrentTime(audio.currentTime) // Initialize currentTime
     }
@@ -159,13 +181,14 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     }
   }, [isAudioReady, userConfirmed, showContinueDialog])
 
-  // Auto-play audio when user confirms
+  // Auto-play audio when user confirms (only on initial confirm, not on subsequent changes)
   useEffect(() => {
-    if (isAudioReady && userConfirmed && audioRef.current && !isPlaying) {
+    if (isAudioReady && userConfirmed && audioRef.current && !hasInitiallyPlayed) {
       audioRef.current.play()
       setIsPlaying(true)
+      setHasInitiallyPlayed(true)
     }
-  }, [isAudioReady, userConfirmed, audioRef.current, isPlaying])
+  }, [isAudioReady, userConfirmed, audioRef.current, hasInitiallyPlayed])
 
   // Update current time for progress bar
   useEffect(() => {
@@ -174,13 +197,85 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     const audio = audioRef.current
     const updateTime = () => {
       if (!isSeeking) {
-        setCurrentTime(audio.currentTime)
+        const newTime = audio.currentTime
+        const audioDuration = audio.duration || 0
+        const stateDuration = duration
+        const progressPercent = audioDuration > 0 ? (newTime / audioDuration) * 100 : 0
+        
+        console.log('🟢 updateTime called:', {
+          currentTime: newTime.toFixed(2),
+          audioDuration: audioDuration.toFixed(2),
+          stateDuration: stateDuration.toFixed(2),
+          progress: progressPercent.toFixed(1) + '%',
+          paused: audio.paused,
+          readyState: audio.readyState,
+          timestamp: Date.now()
+        })
+        
+        setCurrentTime(newTime)
+        
+        // Ensure duration state is updated if it's different
+        if (audioDuration > 0 && Math.abs(audioDuration - stateDuration) > 0.1) {
+          console.log('Updating duration state from', stateDuration, 'to', audioDuration)
+          setDuration(audioDuration)
+        }
       }
     }
 
+    const handlePlayEvent = () => {
+      console.log('Audio play event triggered')
+      setIsPlaying(true)
+    }
+    
+    const handlePauseEvent = () => {
+      console.log('Audio pause event triggered')
+      setIsPlaying(false)
+    }
+
+    const handleLoadStart = () => {
+      console.log('Audio load start')
+    }
+
+    const handleError = (e: Event) => {
+      console.error('Audio error:', e)
+    }
+
+    const handleDurationChange = () => {
+      console.log('Duration changed:', audio.duration)
+      setDuration(audio.duration || 0)
+    }
+
     audio.addEventListener('timeupdate', updateTime)
-    return () => audio.removeEventListener('timeupdate', updateTime)
+    audio.addEventListener('play', handlePlayEvent)
+    audio.addEventListener('pause', handlePauseEvent)
+    audio.addEventListener('loadstart', handleLoadStart)
+    audio.addEventListener('error', handleError)
+    audio.addEventListener('durationchange', handleDurationChange)
+    
+    return () => {
+      audio.removeEventListener('timeupdate', updateTime)
+      audio.removeEventListener('play', handlePlayEvent)
+      audio.removeEventListener('pause', handlePauseEvent)
+      audio.removeEventListener('loadstart', handleLoadStart)
+      audio.removeEventListener('error', handleError)
+      audio.removeEventListener('durationchange', handleDurationChange)
+    }
   }, [isSeeking])
+
+  // Force update currentTime periodically (fallback)
+  useEffect(() => {
+    if (!audioRef.current || !isPlaying) return
+
+    const interval = setInterval(() => {
+      if (audioRef.current && !isSeeking && !audioRef.current.paused) {
+        const newTime = audioRef.current.currentTime
+        console.log('⏰ Force update currentTime:', newTime.toFixed(2))
+        setCurrentTime(newTime)
+      }
+    }, 500) // Update every 500ms as fallback
+
+    return () => clearInterval(interval)
+  }, [isPlaying, isSeeking])
 
   const handleContinueConfirm = () => {
     setUserConfirmed(true)
@@ -272,9 +367,16 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
         <button
           onClick={handlePlay}
           className={`p-2 rounded-full text-white transition-colors duration-100 shadow-md focus:outline-none select-none ${
-            !userConfirmed ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 hover:shadow-lg'
+            !userConfirmed ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 
+            (isPlaying && disableControls) ? 'bg-blue-600 cursor-not-allowed' : 
+            'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 hover:shadow-lg'
           }`}
-          disabled={!userConfirmed}
+          disabled={!isAudioReady}
+          title={
+            !userConfirmed ? 'Click "Bắt đầu" first' :
+            (isPlaying && disableControls) ? 'Pause not available in test mode' :
+            isPlaying ? 'Pause' : 'Play'
+          }
           style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
           {isPlaying ? (
             <svg className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,43 +465,52 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
             )}
 
             {/* Progress Bar */}
-            <input
-              type="range"
-              min="0"
-              max={Number.isFinite(audioRef.current?.duration) ? audioRef.current!.duration : 0}
-              value={currentTime}
-              onChange={handleSeek}
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              disabled={disableControls || !userConfirmed}
-              className={`
-                  flex-1 h-2 rounded-lg appearance-none cursor-pointer transition-all duration-100 select-none
-                  bg-gradient-to-r from-blue-500 to-gray-200 focus:outline-none
-                  ${disableControls || !userConfirmed ? 'opacity-50 cursor-not-allowed' : 'hover:from-blue-600'}
-                  [&::-webkit-slider-thumb]:appearance-none
-                  [&::-webkit-slider-thumb]:w-4
-                  [&::-webkit-slider-thumb]:h-4
-                  [&::-webkit-slider-thumb]:rounded-full
-                  [&::-webkit-slider-thumb]:bg-blue-600
-                  [&::-webkit-slider-thumb]:cursor-grab
-                  [&::-webkit-slider-thumb]:shadow-md
-                  [&::-webkit-slider-thumb]:transition-all
-                  [&::-webkit-slider-thumb]:duration-100
-                  [&::-webkit-slider-thumb]:border-0
-                  [&::-webkit-slider-thumb]:outline-none
-                  [&::-webkit-slider-thumb]:focus:outline-none
-                  [&::-webkit-slider-track]:bg-transparent
-                  [&::-webkit-slider-track]:border-0
-                  [&::-webkit-slider-track]:outline-none
-                  ${!disableControls && userConfirmed ? '[&::-webkit-slider-thumb]:hover:bg-blue-700 [&::-webkit-slider-thumb]:hover:shadow-lg [&::-webkit-slider-thumb]:active:cursor-grabbing' : ''}
+            <div className="flex-1 relative h-2">
+              {/* Background track */}
+              <div className="absolute inset-0 h-2 bg-gray-200 rounded-lg"></div>
+              
+              {/* Progress fill */}
+              <div 
+                className="absolute left-0 top-0 h-2 bg-blue-500 rounded-lg transition-all duration-200"
+                style={{
+                  width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`
+                }}
+              ></div>
+              
+              {/* Invisible range input for interaction */}
+              <input
+                type="range"
+                min="0"
+                max={duration || 0}
+                value={currentTime}
+                onChange={handleSeek}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                disabled={disableControls || !userConfirmed}
+                className={`
+                  absolute inset-0 w-full h-2 opacity-0 cursor-pointer
+                  ${disableControls || !userConfirmed ? 'cursor-not-allowed' : ''}
                 `}
-              style={{
-                background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(currentTime / (audioRef.current?.duration ?? 1)) * 100}%, #E5E7EB ${(currentTime / (audioRef.current?.duration ?? 1)) * 100}%, #E5E7EB 100%)`,
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                outline: 'none',
-              }}
-            />
+                style={{
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                }}
+              />
+              
+              {/* Thumb */}
+              <div 
+                className={`
+                  absolute w-4 h-4 bg-blue-600 rounded-full shadow-md transition-all duration-100
+                  ${!disableControls && userConfirmed ? 'hover:bg-blue-700 hover:shadow-lg' : ''}
+                  ${disableControls || !userConfirmed ? 'opacity-50' : ''}
+                `}
+                style={{
+                  left: `calc(${duration > 0 ? (currentTime / duration) * 100 : 0}% - 8px)`,
+                  top: '-4px',
+                  pointerEvents: 'none'
+                }}
+              ></div>
+            </div>
 
             {/* Skip Forward 5s on Progress */}
             {!disableControls && (
@@ -425,8 +536,8 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
 
         {/* Time Display */}
         <div className="text-sm font-medium text-gray-600 min-w-[70px] text-right">
-          {(audioRef.current?.duration as any) > 0
-            ? `${formatTime(currentTime)} / ${formatTime(audioRef.current?.duration as any)}`
+          {duration > 0
+            ? `${formatTime(currentTime)} / ${formatTime(duration)}`
             : '0:00 / 0:00'}
         </div>
       </div>
