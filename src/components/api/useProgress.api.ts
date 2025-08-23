@@ -1,7 +1,7 @@
 import { initializeDirectus } from '@/libs/directus'
 import { handleDirectusError } from '@/utils/auth-error.utils'
 import { createItem, deleteItems, readItems, updateItem } from '@directus/sdk'
-import { useMutation, UseMutationOptions, useQuery, UseQueryOptions } from 'react-query'
+import { useMutation, UseMutationOptions, useQuery } from 'react-query'
 
 type ProgressRecord = {
   id: number
@@ -12,22 +12,23 @@ type ProgressRecord = {
   test?: number | null
 }
 
-export const useGetProgress = (
-  testId: number | undefined,
-  studentId: string | undefined,
-  options?: UseQueryOptions<ProgressRecord | null, Error>,
-) =>
+export const useGetProgress = (testId?: number, studentId?: string, testGroupId?: number) =>
   useQuery<ProgressRecord | null, Error>({
-    queryKey: ['useGetProgress', testId, studentId],
-    enabled: typeof testId === 'number' && !!studentId && !Number.isNaN(testId),
+    queryKey: ['useGetProgress', testId, testGroupId, studentId],
+    enabled: !!testId && !!studentId && !Number.isNaN(testId),
     queryFn: async () => {
       try {
         const directus = await initializeDirectus()
+
         const res = await directus.request(
           readItems('tests_progress', {
-            filter: { test: { _eq: testId }, student: { _eq: studentId } },
+            filter: {
+              test: { _eq: testId },
+              student: { _eq: studentId },
+              ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
+            },
             limit: 1,
-            fields: ['id', 'remaining_time', 'remaining_audio_time', 'current_part', 'student', 'test'],
+            fields: ['id', 'remaining_time', 'remaining_audio_time', 'current_part', 'student', 'test', 'test_group'],
           }),
         )
         const result = Array.isArray(res) && res.length > 0 ? (res[0] as ProgressRecord) : null
@@ -37,7 +38,6 @@ export const useGetProgress = (
         throw error
       }
     },
-    ...options,
   })
 
 type UpsertProgressParams = {
@@ -46,6 +46,7 @@ type UpsertProgressParams = {
   remainingTime: number
   remainingAudioTime?: number
   currentPart?: number
+  testGroupId?: number
 }
 
 async function upsertProgress({
@@ -54,12 +55,18 @@ async function upsertProgress({
   remainingTime,
   remainingAudioTime,
   currentPart,
+  testGroupId,
 }: UpsertProgressParams) {
   try {
     const directus = await initializeDirectus()
+
     const existing = await directus.request(
       readItems('tests_progress', {
-        filter: { test: { _eq: testId }, student: { _eq: studentId } },
+        filter: {
+          test: { _eq: testId },
+          student: { _eq: studentId },
+          ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
+        },
         limit: 1,
         fields: ['id', 'remaining_time', 'remaining_audio_time', 'current_part'],
       }),
@@ -92,6 +99,7 @@ async function upsertProgress({
         test: testId,
         student: studentId,
         remaining_time: remainingTime,
+        test_group: testGroupId,
         ...(remainingAudioTime !== undefined && { remaining_audio_time: remainingAudioTime }),
         ...(currentPart !== undefined && { current_part: currentPart }),
       }),
@@ -107,19 +115,22 @@ export const useUpsertProgress = (options?: UseMutationOptions<{ id: number }, E
   useMutation({ mutationFn: upsertProgress, ...options })
 
 // Delete progress when test is completed
-type DeleteProgressParams = { testId: number; studentId: string }
+type DeleteProgressParams = { testId: number; testGroupId?: number; studentId: string }
 
-async function deleteProgress({ testId, studentId }: DeleteProgressParams) {
+async function deleteProgress({ testId, testGroupId, studentId }: DeleteProgressParams) {
   try {
     const directus = await initializeDirectus()
+
     const existing = await directus.request(
       readItems('tests_progress', {
-        filter: { test: { _eq: testId }, student: { _eq: studentId } },
+        filter: {
+          test: { _eq: testId },
+          student: { _eq: studentId },
+          ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
+        },
         fields: ['id'],
       }),
     )
-
-    console.log(existing)
 
     if (Array.isArray(existing) && existing.length > 0) {
       await directus.request(

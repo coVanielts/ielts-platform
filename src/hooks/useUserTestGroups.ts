@@ -1,4 +1,5 @@
 import { initializeDirectus } from '@/libs/directus'
+import { Tests } from '@/types/collections.type'
 import { readItems, readMe } from '@directus/sdk'
 import { useQuery } from 'react-query'
 
@@ -34,8 +35,8 @@ async function fetchUserTestGroups(): Promise<UserTestGroup[]> {
       readItems('classes_translations_directus_users', {
         filter: {
           directus_users_id: {
-            _eq: userId
-          }
+            _eq: userId,
+          },
         },
         fields: [
           '*',
@@ -53,28 +54,20 @@ async function fetchUserTestGroups(): Promise<UserTestGroup[]> {
                           {
                             tests: [
                               {
-                                tests_id: [
-                                  'id',
-                                  'name', 
-                                  'type',
-                                  'date_created',
-                                  'due_date',
-                                  'time_limit',
-                                  'is_practice_test'
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      })
+                                tests_id: ['*'],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
     )
 
     // Process the data to extract test groups
@@ -120,23 +113,102 @@ async function fetchUserTestGroups(): Promise<UserTestGroup[]> {
           const testGroup = testGroupLink.test_groups_id
           if (testGroup && !testGroupIds.has(testGroup.id)) {
             testGroupIds.add(testGroup.id)
-            
-            const tests = testGroup.tests?.map((testLink: { tests_id: { id: string; name: string; type: string; date_created: string; due_date: string; time_limit: number; is_practice_test: boolean } }) => testLink.tests_id) || []
-            
+
+            const tests =
+              testGroup.tests?.map(
+                (testLink: {
+                  tests_id: {
+                    id: string
+                    name: string
+                    type: string
+                    date_created: string
+                    due_date: string
+                    time_limit: number
+                    is_practice_test: boolean
+                  }
+                }) => testLink.tests_id,
+              ) || []
+
             userTestGroups.push({
               id: testGroup.id,
-              name: testGroup.name || 'Unnamed Test Group',
-              status: testGroup.status || 'active',
-              is_practice_test: testGroup.is_practice_test || false,
-              tests: tests,
+              name: testGroup.name ?? 'Unnamed Test Group',
+              status: 'assigned',
+              is_practice_test: testGroup.is_practice_test ?? false,
               classId: classTranslation.id,
               totalTests: tests.length,
-              completedTests: 0 // TODO: Calculate completion status
+              completedTests: 0,
+              tests,
             })
           }
         })
       }
     })
+
+    for (const testGroup of userTestGroups) {
+      try {
+        const dueDate = testGroup.tests.reduce((acc, test) => {
+          if (test.due_date && new Date(test.due_date) < new Date(acc)) {
+            return test.due_date
+          }
+          return acc
+        }, new Date().toISOString())
+
+        // Check if overdue
+        if (dueDate && new Date(dueDate) < new Date()) {
+          testGroup.status = 'overdue'
+        }
+
+        // Check results
+        const results = await directus.request(
+          readItems('results', {
+            filter: {
+              student: { _eq: userId },
+              test: { _in: testGroup.tests.map(test => parseInt(test.id)) },
+              test_group: { _eq: parseInt(testGroup.id) },
+            },
+            limit: 4,
+          }),
+        )
+
+        if (results.length === testGroup.tests.length) {
+          testGroup.status = 'completed'
+        }
+
+        const progress = await directus.request(
+          readItems('tests_progress', {
+            filter: {
+              student: { _eq: userId },
+              test: { _in: testGroup.tests.map(test => parseInt(test.id)) },
+              test_group: { _eq: parseInt(testGroup.id) },
+            },
+            fields: ['id', 'test', { test: ['id', 'type'] }, 'remaining_time'],
+            limit: 1,
+          }),
+        )
+
+        const currentProgress = progress?.[0]
+        if (currentProgress?.remaining_time) {
+          const currentSkill = (currentProgress.test as Tests)?.type
+
+          if (currentSkill === 'Listening') {
+            testGroup.completedTests++
+          }
+          if (currentSkill === 'Reading') {
+            testGroup.completedTests++
+          }
+          if (currentSkill === 'Writing') {
+            testGroup.completedTests++
+          }
+          if (currentSkill === 'Speaking') {
+            testGroup.completedTests++
+          }
+
+          testGroup.status = 'in_progress'
+        }
+      } catch (error) {
+        console.error(`Error fetching progress/results for test ${testGroup.id}:`, error)
+      }
+    }
 
     return userTestGroups
   } catch (error) {
@@ -149,10 +221,5 @@ export function useUserTestGroups() {
   return useQuery({
     queryKey: ['user-test-groups'],
     queryFn: fetchUserTestGroups,
-    retry: 3,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
   })
 }

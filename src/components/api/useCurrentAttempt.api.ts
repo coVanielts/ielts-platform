@@ -2,22 +2,30 @@ import { initializeDirectus } from '@/libs/directus'
 import { fetchAudioFromDirectus } from '@/utils/audio.utils'
 import { handleDirectusError } from '@/utils/auth-error.utils'
 import { readItems } from '@directus/sdk'
-import { UseQueryOptions, useQuery } from 'react-query'
+import { useQuery } from 'react-query'
 
 type AttemptData = {
   attempt: number
   answers: Array<{ id: number; question: number; answers: unknown }>
 }
 
-const fetchAttempt = async (params: { testId: number; studentId: string }): Promise<AttemptData> => {
-  const { testId, studentId } = params
+const fetchAttempt = async (params: {
+  testId: number
+  studentId: string
+  testGroupId: number
+}): Promise<AttemptData> => {
+  const { testId, studentId, testGroupId } = params
   try {
     const directus = await initializeDirectus()
 
     const [results, answers] = await Promise.all([
       directus.request(
         readItems('results', {
-          filter: { test: { _eq: testId }, student: { _eq: studentId } },
+          filter: {
+            test: { _eq: testId },
+            student: { _eq: studentId },
+            ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
+          },
           sort: ['-attempt'],
           limit: 1,
           fields: ['id', 'attempt'],
@@ -25,7 +33,11 @@ const fetchAttempt = async (params: { testId: number; studentId: string }): Prom
       ),
       directus.request(
         readItems('answers', {
-          filter: { test: { _eq: testId }, student: { _eq: studentId } },
+          filter: {
+            test: { _eq: testId },
+            student: { _eq: studentId },
+            ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
+          },
           sort: ['-attempt'],
           limit: 500,
           fields: ['id', 'attempt', 'question', 'answers', 'attachment', 'writing_submission'],
@@ -60,15 +72,11 @@ const fetchAttempt = async (params: { testId: number; studentId: string }): Prom
   }
 }
 
-export const useCurrentAttempt = (
-  testId: number | undefined,
-  studentId: string | undefined,
-  options?: UseQueryOptions<AttemptData, Error>,
-) =>
+export const useCurrentAttempt = (testId?: number, studentId?: string, testGroupId?: number) =>
   useQuery<AttemptData, Error>({
-    queryKey: ['useCurrentAttempt', testId, studentId],
-    queryFn: () => fetchAttempt({ testId: testId as number, studentId: studentId as string }),
+    queryKey: ['useCurrentAttempt', testId, testGroupId, studentId],
+    queryFn: () =>
+      fetchAttempt({ testId: testId as number, studentId: studentId as string, testGroupId: testGroupId as number }),
     enabled: typeof testId === 'number' && !!studentId && !Number.isNaN(testId),
     staleTime: 0,
-    ...options,
   })

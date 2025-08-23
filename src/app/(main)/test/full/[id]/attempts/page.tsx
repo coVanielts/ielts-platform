@@ -1,9 +1,9 @@
 'use client'
 
 import LoadingSpinner from '@/components/LoadingSpinner'
-import { appPaths } from '@/constants/appPaths'
 import { initializeDirectus } from '@/libs/directus'
-import { readItems, readMe } from '@directus/sdk'
+import { Tests } from '@/types/collections.type'
+import { readItem, readItems, readMe } from '@directus/sdk'
 import { ArrowLeft, Calendar, Clock, FileText, Play, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -22,13 +22,12 @@ interface TestAttempt {
 interface TestInfo {
   id: number
   name: string
-  type: string
-  time_limit: number
+  tests: Tests[]
 }
 
-export default function TestAttemptsPage() {
+export default function TestGroupAttemptsPage() {
   const params = useParams()
-  const testId = params.id as string
+  const testGroupId = params.id as string
   const [loading, setLoading] = useState(true)
   const [attempts, setAttempts] = useState<TestAttempt[]>([])
   const [testInfo, setTestInfo] = useState<TestInfo | null>(null)
@@ -48,16 +47,13 @@ export default function TestAttemptsPage() {
 
         // Fetch test info
         const testData = await directus.request(
-          readItems('tests', {
-            filter: {
-              id: { _eq: parseInt(testId) },
-            },
-            fields: ['id', 'name', 'type', 'time_limit'],
+          readItem('test_groups', parseInt(testGroupId), {
+            fields: ['id', 'name', 'tests'],
           }),
         )
 
-        if (testData && testData.length > 0) {
-          setTestInfo(testData[0] as TestInfo)
+        if (testData) {
+          setTestInfo(testData as TestInfo)
         } else {
           throw new Error('Test not found')
         }
@@ -66,7 +62,7 @@ export default function TestAttemptsPage() {
         const resultsData = await directus.request(
           readItems('results', {
             filter: {
-              test: { _eq: parseInt(testId) },
+              test_group: { _eq: parseInt(testGroupId) },
               student: { _eq: userId },
             },
             sort: ['-date_created'],
@@ -87,7 +83,7 @@ export default function TestAttemptsPage() {
     }
 
     fetchAttempts()
-  }, [testId])
+  }, [testGroupId])
 
   const formatTime = (seconds: number | null): string => {
     if (!seconds) return '0:00'
@@ -160,11 +156,7 @@ export default function TestAttemptsPage() {
                   <div className="flex items-center space-x-4 text-sm text-neutral-600">
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
-                      <span>{testInfo?.time_limit} minutes</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <FileText className="w-4 h-4" />
-                      <span>Type: {testInfo?.type}</span>
+                      <span>{testInfo?.tests?.length} tests</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
@@ -172,11 +164,7 @@ export default function TestAttemptsPage() {
                     </div>
                   </div>
                 </div>
-                <Link
-                  href={
-                    testInfo?.type?.toLowerCase() === 'full' ? `/test/full/${testId}` : `${appPaths.tests}/${testId}`
-                  }
-                  className="btn btn-primary">
+                <Link href={`/test/full/${testGroupId}`} className="btn btn-primary">
                   <Plus className="w-4 h-4 mr-2" />
                   Take Test Again
                 </Link>
@@ -224,7 +212,7 @@ export default function TestAttemptsPage() {
                           </div>
                         </div>
                         <Link
-                          href={`/test/${testId}/results?attempt=${attempt.attempt || 1}`}
+                          href={`/test/full/${testGroupId}/results?attempt=${attempt.attempt || 1}`}
                           className="btn btn-outline btn-sm">
                           <FileText className="w-4 h-4 mr-2" />
                           View Details
@@ -238,11 +226,7 @@ export default function TestAttemptsPage() {
                   <FileText className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-neutral-900 mb-2">No attempts yet</h3>
                   <p className="text-neutral-600 mb-4">You haven't taken this test yet.</p>
-                  <Link
-                    href={
-                      testInfo?.type?.toLowerCase() === 'full' ? `/test/full/${testId}` : `${appPaths.tests}/${testId}`
-                    }
-                    className="btn btn-primary">
+                  <Link href={`/test/full/${testGroupId}`} className="btn btn-primary">
                     <Play className="w-4 h-4 mr-2" />
                     Take Test
                   </Link>

@@ -22,19 +22,19 @@ import {
 import { fetchAudioFromDirectus } from '@/utils/audio.utils'
 import { AlertCircle, ArrowLeft, Clock, Send } from 'lucide-react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 type Props = {
   testId: number
+  testGroupId?: number
   onCompleted?: () => void
 }
 
-export default function TestRunnerWithoutInstructions({ testId, onCompleted }: Props) {
+export default function TestRunnerWithoutInstructions({ testId, testGroupId, onCompleted }: Props) {
   const router = useRouter()
   const { data: user } = useUser()
   const studentId = user?.id as string | undefined
-  const params = useParams()
   const audioRef = useRef<HTMLAudioElement>(null)
   const timeRemainingRef = useRef(0)
   const [testData, setTestData] = useState<any>(null)
@@ -88,14 +88,6 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         ...(type === 'listening' ? { audioUrl: (transformed as any).audioUrl } : {}),
       })
 
-      // Debug log for practice test status
-      console.log('Test loaded:', {
-        name: raw.name,
-        type: raw.type,
-        is_practice_test: raw.is_practice_test,
-        isPractice: raw.is_practice_test || false
-      })
-
       setStartTime(new Date())
     }
     load()
@@ -105,7 +97,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
   const pendingAnswersRef = useRef<Record<string, unknown>>({})
 
   // Attempt and preload answers
-  const { data: attemptData } = useCurrentAttempt(testId, studentId)
+  const { data: attemptData } = useCurrentAttempt(testId, studentId, testGroupId)
   useEffect(() => {
     if (!attemptData) return
     setAnswers(prev => {
@@ -121,7 +113,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
     })
   }, [attemptData])
 
-  const { data: progress, isLoading: progressLoading } = useGetProgress(testId, studentId)
+  const { data: progress, isLoading: progressLoading } = useGetProgress(testId, studentId, testGroupId)
   const [progressInitialized, setProgressInitialized] = useState(false)
 
   useEffect(() => {
@@ -188,11 +180,12 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
           attempt: attemptData.attempt,
           timeSpentSeconds: timeSpentSeconds,
           type: String(testData.type || ''),
+          testGroupId,
         },
         {
           onSuccess: () => {
             if (studentId) {
-              deleteProgress({ testId, studentId })
+              deleteProgress({ testId, studentId, testGroupId })
             }
 
             // Navigate after successful submission
@@ -287,6 +280,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
           testId,
           studentId,
           remainingTime: currentTime,
+          testGroupId,
           currentPart,
         }
 
@@ -345,6 +339,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
 
         const payload: any = {
           testId,
+          testGroupId,
           studentId,
           attempt: attemptData.attempt,
           questionId: qid,
@@ -495,14 +490,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
                 Back to Dashboard
               </Link>
               <div>
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-lg font-semibold text-neutral-900">{testData.title}</h1>
-                  {testData.isPractice && (
-                    <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                      Practice
-                    </span>
-                  )}
-                </div>
+                <h1 className="text-lg font-semibold text-neutral-900">{testData.title}</h1>
                 {testData.type !== 'speaking' && String(testData.instruction || '')?.trim().length > 0 && (
                   <p className="text-sm text-neutral-600">{testData.instruction}</p>
                 )}
@@ -556,7 +544,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
             // Calculate sequential question mapping for reading
             let globalSequentialNumber = 1
             const sequentialQuestionMap = new Map<string, number>()
-            
+
             testData.parts.forEach((part: any) => {
               const partQuestions = part.questionGroups.flatMap((qg: any) => qg.questions || [])
               partQuestions.forEach((question: any) => {
@@ -647,11 +635,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex w-full overflow-x-auto justify-start gap-2">
             {(() => {
-              console.log('TestData type:', testData.type, 'Test data:', testData)
-              
               if (testData.type === 'reading' && testData.parts) {
-                console.log('Using reading navigation logic')
-                // Calculate sequential question numbers for reading
                 let globalQuestionNumber = 1
 
                 return testData.parts.map((part: any, index: number) => {

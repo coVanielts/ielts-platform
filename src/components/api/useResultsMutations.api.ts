@@ -9,9 +9,10 @@ type CreateResultParams = {
   attempt: number
   timeSpentSeconds?: number
   type?: string
+  testGroupId?: number
 }
 
-async function createResult({ testId, studentId, attempt, timeSpentSeconds, type }: CreateResultParams) {
+async function createResult({ testId, studentId, attempt, timeSpentSeconds, type, testGroupId }: CreateResultParams) {
   try {
     const directus = await initializeDirectus()
 
@@ -22,6 +23,7 @@ async function createResult({ testId, studentId, attempt, timeSpentSeconds, type
           test: { _eq: testId },
           student: { _eq: studentId },
           attempt: { _eq: attempt },
+          ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
         },
         fields: ['id'],
       }),
@@ -32,6 +34,7 @@ async function createResult({ testId, studentId, attempt, timeSpentSeconds, type
       createItem('results', {
         test: testId,
         student: studentId,
+        test_group: testGroupId,
         attempt,
         time_spent: timeSpentSeconds ?? null,
         type: type ? type.charAt(0).toUpperCase() + type.slice(1) : null,
