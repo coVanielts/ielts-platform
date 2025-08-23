@@ -647,7 +647,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex w-full overflow-x-auto justify-start gap-2">
             {(() => {
-              console.log('TestData type:', testData.type, 'Test data:', testData)
+              // console.log('TestData type:', testData.type, 'Test data:', testData)
               
               if (testData.type === 'reading' && testData.parts) {
                 console.log('Using reading navigation logic')

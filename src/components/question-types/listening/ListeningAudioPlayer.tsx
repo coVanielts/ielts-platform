@@ -269,7 +269,7 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     const interval = setInterval(() => {
       if (audioRef.current && !isSeeking && !audioRef.current.paused) {
         const newTime = audioRef.current.currentTime
-        console.log('⏰ Force update currentTime:', newTime.toFixed(2))
+        // console.log('⏰ Force update currentTime:', newTime.toFixed(2))
         setCurrentTime(newTime)
       }
     }, 500) // Update every 500ms as fallback

@@ -40,6 +40,7 @@ export const isSupportedQuestionGroupType = (type: string): boolean => {
     'multiple_choice_multiple_answers',
     'matching',
     'matching_letters',
+    'true_false_not_given',
 
     // Reading types
     'true_false_not_given',

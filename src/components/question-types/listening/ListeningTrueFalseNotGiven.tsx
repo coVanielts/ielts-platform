@@ -1,24 +1,21 @@
 import { HighlightableText } from '@/components/HighlightableText'
-interface TrueFalseNotGivenQuestionProps {
+
+interface ListeningTrueFalseNotGivenProps {
   questionNumber: number
   statement: string
   selectedAnswer?: 'T' | 'F' | 'NG'
   onAnswerChange: (answer: 'T' | 'F' | 'NG') => void
   isReadOnly?: boolean
-  passage?: {
-    title: string
-    content: string[]
-  }
   instructions?: string
 }
 
-export default function TrueFalseNotGivenQuestion({
+export default function ListeningTrueFalseNotGiven({
   questionNumber,
   statement,
   selectedAnswer,
   onAnswerChange,
   isReadOnly = false,
-}: TrueFalseNotGivenQuestionProps) {
+}: ListeningTrueFalseNotGivenProps) {
   const options = [
     { value: 'T', label: 'T' },
     { value: 'F', label: 'F' },
@@ -27,7 +24,6 @@ export default function TrueFalseNotGivenQuestion({
 
   return (
     <div className="space-y-6">
-
       {/* Question */}
       <div className="flex items-start space-x-3">
         <span className="font-bold text-gray-700">{questionNumber}.</span>

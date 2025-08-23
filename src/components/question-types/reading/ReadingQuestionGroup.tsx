@@ -163,6 +163,7 @@ export default function ReadingQuestionGroup({
               },
               {} as Record<string, string>,
             )}
+            keepMatchingChoices={group.keep_matching_choices}
           />
         </div>
       )
@@ -636,9 +637,9 @@ export default function ReadingQuestionGroup({
                         <option value="" disabled>
                           Select answer
                         </option>
-                        <option value="TRUE">TRUE</option>
-                        <option value="FALSE">FALSE</option>
-                        <option value="NOT GIVEN">NOT GIVEN</option>
+                        <option value="T">T</option>
+                        <option value="F">F</option>
+                        <option value="NG">NG</option>
                       </select>
                     </div>
                   </div>

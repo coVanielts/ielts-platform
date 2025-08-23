@@ -31,6 +31,7 @@ interface MatchingLettersDragDropProps {
     id: string
     order: number
   }>
+  keepMatchingChoices?: boolean // When true, keep choices available after use
 }
 
 interface DraggableItemProps {
@@ -42,8 +43,9 @@ interface DraggableItemProps {
 interface DroppableZoneProps {
   id: string
   isOver?: boolean
-  answer?: string
+  answer?: string | string[]
   children?: React.ReactNode
+  letters?: string[]
 }
 
 // Draggable component for letters
@@ -82,10 +84,42 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ id, children, isOverlay =
 }
 
 // Droppable zone for each question
-const DroppableZone: React.FC<DroppableZoneProps> = ({ id, isOver, answer, children }) => {
+const DroppableZone: React.FC<DroppableZoneProps> = ({ id, isOver, answer, children, letters = [] }) => {
   const { setNodeRef } = useDroppable({
     id,
   })
+
+  // Helper to get full text for display
+  const getAnswerDisplayText = (letterAnswer: string | undefined | string[]) => {
+    // Handle array input - extract first element
+    let actualLetter: string
+    if (Array.isArray(letterAnswer)) {
+      actualLetter = letterAnswer[0] || ''
+    } else {
+      actualLetter = letterAnswer || ''
+    }
+    
+    // Early return for invalid inputs
+    if (!actualLetter || typeof actualLetter !== 'string') {
+      return actualLetter || ''
+    }
+    
+    // Early return if no letters available
+    if (!letters || !Array.isArray(letters) || letters.length === 0) {
+      return actualLetter
+    }
+    
+    // Find the letter index (A=0, B=1, etc.)
+    const letterIndex = actualLetter.charCodeAt(0) - 65
+    
+    // Validate index and return full text
+    if (letterIndex >= 0 && letterIndex < letters.length && letters[letterIndex]) {
+      return `${actualLetter}. ${letters[letterIndex]}`
+    }
+    
+    // Fallback to just the letter
+    return actualLetter
+  }
 
   // If this is the available letters area, render children directly
   if (id === 'available-letters') {
@@ -107,8 +141,10 @@ const DroppableZone: React.FC<DroppableZoneProps> = ({ id, isOver, answer, child
       `}
     >
       {answer ? (
-        <div className="bg-blue-100 border border-blue-300 rounded-md px-2.5 py-1.5">
-          <span className="font-medium text-blue-800 text-[12px] leading-none">{answer}</span>
+        <div className="bg-blue-100 border border-blue-300 rounded-md px-2 py-1">
+          <span className="font-medium text-blue-800 text-[10px] leading-tight">
+            {getAnswerDisplayText(answer)}
+          </span>
         </div>
       ) : (
         <span className="text-gray-400 text-[12px] leading-none">Drop here</span>
@@ -125,6 +161,7 @@ const MatchingLettersDragDrop: React.FC<MatchingLettersDragDropProps> = ({
   onAnswerChange,
   selectedAnswers = {},
   questions = [],
+  keepMatchingChoices = false,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -199,17 +236,43 @@ const MatchingLettersDragDrop: React.FC<MatchingLettersDragDropProps> = ({
     setActiveId(null)
   }
 
-  // Check if we have fewer drop zones (questions) than drag items (letters)
-  const hasFewerQuestionsThanLetters = answers.length < letters.length
-  
-  // If we have fewer questions than letters, remove assigned letters (letters disappear when used)
-  // If we have more or equal questions, keep all letters available for reuse
-  const unassignedLetters = hasFewerQuestionsThanLetters 
-    ? letters.filter((letter, index) => {
+  // Determine how to handle letter availability based on keepMatchingChoices flag
+  // This logic works on initial render (including page reload) and after each drag action
+  const unassignedLetters = (() => {
+    if (keepMatchingChoices) {
+      // TRUE: Always show all letters (allow reuse)
+      // User can drag the same letter to multiple questions
+      console.log('DEBUG: keepMatchingChoices=true, showing all letters:', letters.length)
+      return letters
+    } else {
+      // FALSE: Remove already assigned letters from available choices
+      // Letters disappear when used, preventing reuse
+      // This works on reload because selectedAnswers contains existing answers
+      
+      // Extract actual used letters, handling both string and array values
+      const usedLetters = Object.values(selectedAnswers).map(answer => {
+        if (Array.isArray(answer)) {
+          return answer[0] || '' // Extract first element if array
+        }
+        return answer || '' // Use directly if string
+      }).filter(letter => letter !== '') // Remove empty values
+      
+      const availableLetters = letters.filter((letter, index) => {
         const letterLabel = getLetterLabel(index)
-        return !Object.values(selectedAnswers).includes(letterLabel)
-      }) // Remove assigned letters when questions < letters
-    : letters // Keep all letters available for reuse when questions >= letters
+        const isAlreadyUsed = usedLetters.includes(letterLabel)
+        return !isAlreadyUsed; // Only show letters that haven't been used
+      })
+      
+      console.log('DEBUG: keepMatchingChoices=false, filtering letters:', {
+        totalLetters: letters.length,
+        rawUsedAnswers: Object.values(selectedAnswers),
+        extractedUsedLetters: usedLetters,
+        availableLetters: availableLetters.length,
+        availableLettersList: availableLetters.map((letter, index) => getLetterLabel(index))
+      })
+      return availableLetters
+    }
+  })()
 
   // Compute display range if not provided
   const displayRange = (() => {
@@ -277,8 +340,8 @@ const MatchingLettersDragDrop: React.FC<MatchingLettersDragDropProps> = ({
                   </div>
 
                   {/* Drop Zone */}
-                  <div className="flex-shrink-0 w-36">
-                    <DroppableZone id={`question-${index}`} answer={assignedLetter} />
+                  <div className="flex-shrink-0 w-44">
+                    <DroppableZone id={`question-${index}`} answer={assignedLetter} letters={letters} />
                   </div>
                 </div>
               </div>
