@@ -230,7 +230,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         setTimeRemaining(prev => {
           const newValue = prev - 1
           // Log every 10 seconds
-            // periodic updates handled silently
+          // periodic updates handled silently
           if (newValue <= 1) {
             clearInterval(timer)
             handleConfirmSubmit()
@@ -273,7 +273,6 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
 
       const currentTime = timeRemainingRef.current
       if (currentTime > 0) {
-<<<<<<< HEAD
         const progressData: any = {
           testId,
           studentId,
@@ -285,9 +284,6 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         const currentAudioTime = audioRef.current?.currentTime ?? 0
         const duration = audioRef.current?.duration ?? 0
 
-=======
-          // navigation debug suppressed
->>>>>>> dev
         const audio = Math.ceil(duration - currentAudioTime)
 
         if (audio > 0 && currentAudioTime > 0) {
@@ -301,7 +297,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
           navigator.sendBeacon('/api/progress/save', blob)
         }
 
-        upsertProgress(progressData)
+        // upsertProgress(progressData)
       }
     }
 
@@ -636,13 +632,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex w-full overflow-x-auto justify-start gap-2">
             {(() => {
-<<<<<<< HEAD
               if (testData.type === 'reading' && testData.parts) {
-=======
-              // navigation rendering
-              if (testData.type === 'reading' && testData.parts) {
-                // Calculate sequential question numbers for reading
->>>>>>> dev
                 let globalQuestionNumber = 1
 
                 return testData.parts.map((part: any, index: number) => {

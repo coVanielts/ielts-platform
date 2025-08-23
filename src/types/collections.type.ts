@@ -8,8 +8,8 @@ export type Answers = {
   result?: number | Results | null
   student?: string | DirectusUsers | null
   test?: number | Tests | null
-  writing_submission?: string | null
   test_group?: number | TestGroups | null
+  writing_submission?: string | null
 }
 
 export type AnswersFiles = {
@@ -409,6 +409,7 @@ export type DirectusUsers = {
   appearance?: string | null
   auth_data?: unknown | null
   avatar?: string | DirectusFiles | null
+  classes: any[] | JunctionDirectusUsersClasses[]
   description?: string | null
   email?: string | null
   email_notifications?: boolean | null
@@ -463,16 +464,22 @@ export type DirectusWebhooks = {
   was_active_before_deprecation: boolean
 }
 
+export type JunctionDirectusUsersClasses = {
+  classes_id?: number | Classes | null
+  directus_users_id?: string | DirectusUsers | null
+  id: number
+}
+
 export type QuestionGroups = {
   answers?: unknown | null
   choices?: unknown | null
   content?: unknown | null
   id: number
   images: any[] | QuestionGroupsFiles[]
+  isKeepAnswer?: boolean | null
   letters?: unknown | null
   max_number_of_words?: number | null
   order: number
-  paragraphs?: unknown | null
   questions: any[] | Questions[]
   speaking_time?: number | null
   title?: unknown | null
@@ -498,24 +505,38 @@ export type Results = {
   answers: any[] | Answers[]
   attempt?: number | null
   band_score?: number | null
+  class?: number | Classes | null
   date_created?: string | null
   date_updated?: string | null
   FC?: number | null
+  FC_feedback?: number | null
+  feedback: any[] | ResultsFiles1[]
   GRA?: number | null
+  GRA_feedback?: number | null
   id: number
   LR?: number | null
+  LR_feedback?: number | null
   number_of_correct_answers?: number | null
   P?: number | null
+  P_feedback?: number | null
   speaking: string
   student?: string | DirectusUsers | null
   task_1_CC?: number | null
+  task_1_CC_feedback?: number | null
   task_1_GRA?: number | null
+  task_1_GRA_feedback?: number | null
   task_1_LR?: number | null
+  task_1_LR_feedback?: number | null
   task_1_TA?: number | null
+  task_1_TA_feedback?: number | null
   task_2_CC?: number | null
+  task_2_CC_feedback?: number | null
   task_2_GRA?: number | null
+  task_2_GRA_feedback?: number | null
   task_2_LR?: number | null
+  task_2_LR_feedback?: number | null
   task_2_TA?: number | null
+  task_2_TA_feedback?: number | null
   test?: number | Tests | null
   test_group?: number | TestGroups | null
   time_spent?: number | null
@@ -524,6 +545,12 @@ export type Results = {
 }
 
 export type ResultsFiles = {
+  directus_files_id?: string | DirectusFiles | null
+  id: number
+  results_id?: number | Results | null
+}
+
+export type ResultsFiles1 = {
   directus_files_id?: string | DirectusFiles | null
   id: number
   results_id?: number | Results | null
@@ -602,8 +629,8 @@ export type Tests = {
 export type TestsProgress = {
   current_part?: number | TestParts | null
   id: number
-  remaining_time?: number | null
   remaining_audio_time?: number | null
+  remaining_time?: number | null
   student?: string | DirectusUsers | null
   test?: number | Tests | null
   test_group?: number | TestGroups | null
@@ -650,11 +677,13 @@ export type CustomDirectusTypes = {
   directus_users: DirectusUsers[]
   directus_versions: DirectusVersions[]
   directus_webhooks: DirectusWebhooks[]
+  junction_directus_users_classes: JunctionDirectusUsersClasses[]
   question_groups: QuestionGroups[]
   question_groups_files: QuestionGroupsFiles[]
   questions: Questions[]
   results: Results[]
   results_files: ResultsFiles[]
+  results_files_1: ResultsFiles1[]
   reveal_answer: RevealAnswer[]
   reveal_answer_test_groups: RevealAnswerTestGroups[]
   reveal_answer_tests: RevealAnswerTests[]

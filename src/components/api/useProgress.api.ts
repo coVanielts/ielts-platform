@@ -68,7 +68,7 @@ async function upsertProgress({
           ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
         },
         limit: 1,
-        fields: ['id', 'remaining_time', 'remaining_audio_time', 'current_part'],
+        fields: ['id', 'remaining_time'],
       }),
     )
 
@@ -132,11 +132,6 @@ async function deleteProgress({ testId, testGroupId, studentId }: DeleteProgress
       }),
     )
 
-<<<<<<< HEAD
-=======
-  // existing progress fetched
-
->>>>>>> dev
     if (Array.isArray(existing) && existing.length > 0) {
       await directus.request(
         deleteItems(

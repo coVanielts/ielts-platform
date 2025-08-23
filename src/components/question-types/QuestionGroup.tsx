@@ -44,7 +44,6 @@ export const QuestionGroup: React.FC<QuestionGroupProps> = ({
     ...group,
     questionType: mappedQuestionType,
   }
-  debugger;
 
   // Check if the question type is supported
   if (!isSupportedQuestionGroupType(mappedQuestionType)) {

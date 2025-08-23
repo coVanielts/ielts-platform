@@ -21,7 +21,7 @@ export const SpeakingQuestionGroup: React.FC<SpeakingQuestionGroupProps> = ({
   const questionRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
 
   useEffect(() => {
-    if (answers && typeof answers === 'string') {
+    if (answers) {
       setLocalAnswers(answers)
     }
   }, [answers, setLocalAnswers])

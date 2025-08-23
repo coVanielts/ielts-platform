@@ -1,5 +1,5 @@
 import { Pause, Play, X } from 'lucide-react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 
 interface AudioUploaderProps {
   questionId: string
@@ -98,8 +98,6 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
     [onAudioUpload, questionId],
   )
 
-  useEffect(() => {}, [])
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     await processSelectedFile(event.target)
   }
@@ -151,7 +149,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
           className="sr-only"
         />
 
-        {currentAudioUrl && (
+        {currentAudioUrl && typeof currentAudioUrl === 'string' && (
           <>
             <button onClick={handlePlayPause} className="p-2 rounded-full hover:bg-gray-100" disabled={isDisabled}>
               {isPlaying ? <Pause className="w-5 h-5 text-gray-600" /> : <Play className="w-5 h-5 text-gray-600" />}
