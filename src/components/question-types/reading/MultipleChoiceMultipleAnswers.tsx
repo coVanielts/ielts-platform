@@ -38,22 +38,25 @@ const MultipleChoiceMultipleAnswers: React.FC<MultipleChoiceMultipleAnswersProps
       newAnswers = currentAnswers.filter(id => id !== optionId)
     } else {
       // Add if not selected, but check max limit
-        if (maxAnswers && currentAnswers.length >= maxAnswers) {
+      if (maxAnswers && currentAnswers.length >= maxAnswers) {
         // If at max limit, replace the first selected option
         newAnswers = [...currentAnswers.slice(1), optionId]
+        console.log(`Max answers (${maxAnswers}) reached. Replacing first option with ${optionId}`)
       } else {
         // Add to selection
         newAnswers = [...currentAnswers, optionId]
       }
     }
 
-  // updating answers
+    console.log(`Updating answers for question ${questionId}:`, newAnswers)
 
     // Đảm bảo rằng newAnswers không bị thay đổi sau khi gọi onAnswerChange
     onAnswerChange(questionId, [...newAnswers])
   }
 
-  // rendering MultipleChoiceMultipleAnswers
+  // Debug log
+  console.log('MultipleChoiceMultipleAnswers rendering with selectedAnswers:', selectedAnswers)
+  console.log('MultipleChoiceMultipleAnswers questions:', questions)
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">

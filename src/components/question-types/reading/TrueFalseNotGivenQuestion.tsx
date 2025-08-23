@@ -2,8 +2,8 @@ import { HighlightableText } from '@/components/HighlightableText'
 interface TrueFalseNotGivenQuestionProps {
   questionNumber: number
   statement: string
-  selectedAnswer?: 'T' | 'F' | 'NG'
-  onAnswerChange: (answer: 'T' | 'F' | 'NG') => void
+  selectedAnswer?: 'TRUE' | 'FALSE' | 'NOT_GIVEN'
+  onAnswerChange: (answer: 'TRUE' | 'FALSE' | 'NOT_GIVEN') => void
   isReadOnly?: boolean
   passage?: {
     title: string
@@ -20,9 +20,9 @@ export default function TrueFalseNotGivenQuestion({
   isReadOnly = false,
 }: TrueFalseNotGivenQuestionProps) {
   const options = [
-    { value: 'T', label: 'T' },
-    { value: 'F', label: 'F' },
-    { value: 'NG', label: 'NG' },
+    { value: 'TRUE', label: 'TRUE' },
+    { value: 'FALSE', label: 'FALSE' },
+    { value: 'NOT_GIVEN', label: 'NOT GIVEN' },
   ] as const
 
   return (
@@ -37,7 +37,7 @@ export default function TrueFalseNotGivenQuestion({
           </p>
           <select
             value={selectedAnswer || ''}
-            onChange={e => onAnswerChange(e.target.value as 'T' | 'F' | 'NG')}
+            onChange={e => onAnswerChange(e.target.value as 'TRUE' | 'FALSE' | 'NOT_GIVEN')}
             disabled={isReadOnly}
             className="form-select w-full max-w-[200px] px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white">
             <option value="" disabled>

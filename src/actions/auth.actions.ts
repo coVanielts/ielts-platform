@@ -28,7 +28,7 @@ export async function loginAction(params: LoginParams): Promise<LoginResult> {
       }
     }
 
-    
+    console.log(result)
 
     await setAccessToken(result.access_token, new Date(result.expires_at as number))
 

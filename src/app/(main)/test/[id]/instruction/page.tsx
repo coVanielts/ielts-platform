@@ -51,7 +51,7 @@ export default function TestInstructionPage() {
     return <div>Test not found</div>
   }
 
-  // testData loaded
+  console.log(testData)
 
   const isListening = String(testData.type).toLowerCase() === 'listening'
   const isReading = String(testData.type).toLowerCase() === 'reading'

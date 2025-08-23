@@ -44,9 +44,12 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
   }
 
   const handlePlay = () => {
+    console.log('handlePlay called, isPlaying:', isPlaying, 'userConfirmed:', userConfirmed, 'disableControls:', disableControls)
     if (audioRef.current && userConfirmed) {
       if (!isPlaying) {
+        console.log('Attempting to play audio')
         audioRef.current.play().then(() => {
+          console.log('Audio play succeeded')
           setIsPlaying(true)
           setShowContinueDialog(false)
         }).catch((error) => {
@@ -55,14 +58,15 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
       } else {
         // Only allow pause in practice mode (when disableControls is false)
         if (!disableControls) {
+          console.log('Attempting to pause audio (practice mode)')
           audioRef.current.pause()
           setIsPlaying(false)
         } else {
-          // pause not allowed in test mode
+          console.log('Pause not allowed in test mode')
         }
       }
     } else {
-      // cannot play - audioRef or userConfirmed not ready
+      console.log('Cannot play - audioRef or userConfirmed not ready')
     }
   }
 
@@ -129,13 +133,19 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
   }
 
   useEffect(() => {
+    console.log('comeeee11')
+
     const audio = audioRef.current
     if (!audio) return
+    console.log('comeeee1')
 
     const handleReady = () => {
       const audioDuration = audio.duration || 0
       const offset = initialAudioTime || 0
+      console.log('handleReady - duration:', audioDuration, 'offset:', offset)
+      
       setDuration(audioDuration) // Set duration state
+      
       if (offset === 0) return
       audio.currentTime = Math.max(0, audioDuration - offset)
       setCurrentTime(audio.currentTime) // Update state when setting initial time
@@ -144,6 +154,8 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
 
     const handleCanPlay = () => {
       const audioDuration = audio.duration || 0
+      console.log('handleCanPlay - duration:', audioDuration)
+      
       setDuration(audioDuration) // Set duration state
       setIsAudioReady(true)
       setCurrentTime(audio.currentTime) // Initialize currentTime
@@ -190,26 +202,38 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
         const stateDuration = duration
         const progressPercent = audioDuration > 0 ? (newTime / audioDuration) * 100 : 0
         
+        console.log('🟢 updateTime called:', {
+          currentTime: newTime.toFixed(2),
+          audioDuration: audioDuration.toFixed(2),
+          stateDuration: stateDuration.toFixed(2),
+          progress: progressPercent.toFixed(1) + '%',
+          paused: audio.paused,
+          readyState: audio.readyState,
+          timestamp: Date.now()
+        })
         
         setCurrentTime(newTime)
         
         // Ensure duration state is updated if it's different
         if (audioDuration > 0 && Math.abs(audioDuration - stateDuration) > 0.1) {
+          console.log('Updating duration state from', stateDuration, 'to', audioDuration)
           setDuration(audioDuration)
         }
       }
     }
 
     const handlePlayEvent = () => {
+      console.log('Audio play event triggered')
       setIsPlaying(true)
     }
     
     const handlePauseEvent = () => {
+      console.log('Audio pause event triggered')
       setIsPlaying(false)
     }
 
     const handleLoadStart = () => {
-      // load started
+      console.log('Audio load start')
     }
 
     const handleError = (e: Event) => {
@@ -217,7 +241,7 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     }
 
     const handleDurationChange = () => {
-  // duration changed
+      console.log('Duration changed:', audio.duration)
       setDuration(audio.duration || 0)
     }
 
@@ -245,7 +269,7 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     const interval = setInterval(() => {
       if (audioRef.current && !isSeeking && !audioRef.current.paused) {
         const newTime = audioRef.current.currentTime
-        // console.log('⏰ Force update currentTime:', newTime.toFixed(2))
+        console.log('⏰ Force update currentTime:', newTime.toFixed(2))
         setCurrentTime(newTime)
       }
     }, 500) // Update every 500ms as fallback

@@ -51,25 +51,34 @@ export default function ReadingTestLayout({
     const currentPartId = `reading-part-${currentPart || part.partNumber}`
     const partChanged = lastPartRef.current !== currentPartId
     
+    console.log('Reading scroll effect:', { currentPartId, lastPart: lastPartRef.current, partChanged })
+    
     if (partChanged) {
       lastPartRef.current = currentPartId
       
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
+        console.log('Reading: Setting scroll to 0')
         // Always scroll to top when part changes
         if (rightPanelScrollRef.current) {
+          console.log('Right panel scroll before:', rightPanelScrollRef.current.scrollTop)
           rightPanelScrollRef.current.scrollTop = 0
+          console.log('Right panel scroll after:', rightPanelScrollRef.current.scrollTop)
         }
         if (leftPanelScrollRef.current) {
+          console.log('Left panel scroll before:', leftPanelScrollRef.current.scrollTop)
           leftPanelScrollRef.current.scrollTop = 0
+          console.log('Left panel scroll after:', leftPanelScrollRef.current.scrollTop)
         }
         
         // Use setTimeout to override question scrollIntoView (which has 100ms delay)
         setTimeout(() => {
           if (rightPanelScrollRef.current) {
+            console.log('Reading: Final force scroll to top - right panel')
             rightPanelScrollRef.current.scrollTop = 0
           }
           if (leftPanelScrollRef.current) {
+            console.log('Reading: Final force scroll to top - left panel')
             leftPanelScrollRef.current.scrollTop = 0
           }
         }, 150)

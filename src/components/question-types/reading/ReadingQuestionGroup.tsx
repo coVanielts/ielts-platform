@@ -48,7 +48,8 @@ export default function ReadingQuestionGroup({
 
   useEffect(() => {
     // Chỉ scroll khi currentQuestion được chỉ định rõ ràng
-  if (currentQuestion && questionRefs.current[currentQuestion]) {
+    if (currentQuestion && questionRefs.current[currentQuestion]) {
+      console.log(`Scrolling to question ${currentQuestion}`)
       // Thêm delay nhỏ để đảm bảo DOM đã render
       setTimeout(() => {
         questionRefs.current[currentQuestion]?.scrollIntoView({
@@ -64,13 +65,16 @@ export default function ReadingQuestionGroup({
   }
 
   const handleLocalAnswerChange = (questionId: string, answer: unknown) => {
+    console.log('Local answer change:', { questionId, answer }) // Debug log
     setLocalAnswers(prev => {
       const newAnswers = { ...prev, [questionId]: answer }
+      console.log('New local answers:', newAnswers) // Debug log
       return newAnswers
     })
     onAnswerChange(questionId, answer)
   }
 
+  console.log('ReadingQuestionGroup switch case for questionType:', group.questionType)
 
   switch (group.questionType) {
     case 'matching': {
@@ -159,7 +163,6 @@ export default function ReadingQuestionGroup({
               },
               {} as Record<string, string>,
             )}
-            keepMatchingChoices={group.keep_matching_choices}
           />
         </div>
       )
@@ -191,8 +194,14 @@ export default function ReadingQuestionGroup({
               // Find the question that corresponds to this gap position
               const question = group.questions.find(q => q.questionNumber === gapId)
               if (question) {
-                  handleLocalAnswerChange(question.id, value)
-                }
+                console.log('Paragraph ordering answer change:', {
+                  questionId: question.id,
+                  gapId,
+                  value,
+                  questionNumber: question.questionNumber,
+                })
+                handleLocalAnswerChange(question.id, value)
+              }
             }}
             selectedAnswers={selectedAnswers}
           />
@@ -317,7 +326,7 @@ export default function ReadingQuestionGroup({
     }
 
     case 'gap_fill_write_words': {
-      // Rendering WordGap component for questionType
+      console.log('Rendering WordGap component for questionType:', group.questionType)
 
       // Build number -> questionId map for inline gaps
       // For API data, need to extract gap numbers from content and map to questions by order
@@ -330,10 +339,18 @@ export default function ReadingQuestionGroup({
         // Extract gap numbers from TipTap content
         const contentStr = JSON.stringify((group as ReadingQuestionGroupType).contentDoc)
         const gapMatches = contentStr.match(/\[(\d+)\]/g)
-          if (gapMatches) {
+        if (gapMatches) {
           const gapNumbers = gapMatches.map(match => parseInt(match.slice(1, -1), 10)).sort((a, b) => a - b)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const sortedQuestions = [...group.questions].sort((a: any, b: any) => a.order - b.order) // API data has order field
+
+          console.log('Gap numbers from content:', gapNumbers)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          console.log(
+            'Sorted questions:',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            sortedQuestions.map(q => ({ id: q.id, order: (q as any).order })),
+          )
 
           // Map gap numbers directly to question IDs by order
           gapNumbers.forEach((gapNum, index) => {
@@ -384,7 +401,7 @@ export default function ReadingQuestionGroup({
     }
 
     case 'multiple_choice': {
-  // Reading MC - answers object
+      console.log('Reading MC - answers object:', answers || localAnswers)
       const firstQuestion = group.questions[0] as ReadingMultipleChoiceQuestionType
       return (
         <div className="space-y-6">
@@ -415,7 +432,7 @@ export default function ReadingQuestionGroup({
                       } else if (typeof rawAnswer === 'string') {
                         answer = rawAnswer
                       }
-                      // Reading MC Question selectedAnswer computed
+                      console.log(`Reading MC Question ${question.id} selectedAnswer:`, { rawAnswer, answer })
                       return answer
                     })()}
                     onAnswerChange={answer => handleLocalAnswerChange(question.id, answer)}
@@ -475,17 +492,18 @@ export default function ReadingQuestionGroup({
         const sortedOptions = [...firstQuestion.options].sort((a, b) => a.id.localeCompare(b.id))
         const sortedQuestions = [...group.questions].sort((a, b) => a.questionNumber - b.questionNumber)
 
-            if (sortedQuestions.length > 0) {
+        if (sortedQuestions.length > 0) {
           sortedOptions.forEach((option, index) => {
             // Use cyclic mapping: if more options than questions, cycle back to first question
             const questionIndex = index % sortedQuestions.length
             const mappedQuestion = sortedQuestions[questionIndex]
             optionToQuestionMap.set(option.id, mappedQuestion.id)
+            console.log(`MCMA: Option ${option.id} → Question ${mappedQuestion.id} (cyclic index: ${questionIndex})`)
           })
         }
       }
 
-      // optionToQuestionMap prepared
+      console.log('MCMA: optionToQuestionMap:', optionToQuestionMap)
 
       // Create selectedAnswers object by mapping question answers to option IDs
       const selectedAnswersObj = {
@@ -515,7 +533,12 @@ export default function ReadingQuestionGroup({
         })
       }
 
-  // MCMA selectedAnswersObj reconstructed
+      console.log(
+        'MCMA selectedAnswersObj reconstructed:',
+        selectedAnswersObj,
+        'from answers:',
+        answers || localAnswers,
+      )
 
       return (
         <div ref={setQuestionRef(group.questions[0]?.questionNumber || 1)}>
@@ -535,7 +558,12 @@ export default function ReadingQuestionGroup({
             ]}
             selectedAnswers={selectedAnswersObj}
             onAnswerChange={(questionId: string, selectedOptions: string[]) => {
-              // MCMA onAnswerChange
+              console.log('🔥 MCMA onAnswerChange called:', { questionId, selectedOptions })
+              console.log('🔥 Current optionToQuestionMap:', optionToQuestionMap)
+              console.log(
+                '🔥 Group questions:',
+                group.questions.map(q => ({ id: q.id, number: q.questionNumber })),
+              )
 
               // Tạo một bản sao của options để tránh bị thay đổi
               const optionsCopy = [...selectedOptions]
@@ -550,7 +578,11 @@ export default function ReadingQuestionGroup({
               const sortedSelectedOptions = [...optionsCopy].sort((a, b) => a.localeCompare(b))
               const sortedQuestions = [...group.questions].sort((a, b) => a.questionNumber - b.questionNumber)
 
-              // MCMA: Sorted selected options and questions
+              console.log(`MCMA: Sorted selected options:`, sortedSelectedOptions)
+              console.log(
+                `MCMA: Sorted questions:`,
+                sortedQuestions.map(q => ({ id: q.id, number: q.questionNumber })),
+              )
 
               // Map các option đã sắp xếp vào các question theo thứ tự
               sortedSelectedOptions.forEach((optionId, index) => {
@@ -558,14 +590,19 @@ export default function ReadingQuestionGroup({
                   const questionId = sortedQuestions[index].id
                   questionToOptionMap.set(questionId, optionId)
                   assignedQuestions.add(questionId)
+                  console.log(`MCMA: ✓ Mapping option ${optionId} to question ${questionId} (index: ${index})`)
                 } else {
-                  // no question available for this option
+                  console.log(`MCMA: ✗ No question available for option ${optionId} at index ${index}`)
                 }
               })
 
               // Cập nhật answers cho các questions có option được chọn
-              // Update answers for mapped options
+              console.log('🔥 Before updating - current answers state:', answers || localAnswers)
+
+              // Cập nhật lại answers cho các option được chọn
+              console.log('🔥 questionToOptionMap final:', questionToOptionMap)
               questionToOptionMap.forEach((optionId, questionId) => {
+                console.log(`🔥 Setting answer for question ${questionId} to:`, optionId)
                 handleLocalAnswerChange(questionId, optionId)
               })
             }}
@@ -599,9 +636,9 @@ export default function ReadingQuestionGroup({
                         <option value="" disabled>
                           Select answer
                         </option>
-                        <option value="T">T</option>
-                        <option value="F">F</option>
-                        <option value="NG">NG</option>
+                        <option value="TRUE">TRUE</option>
+                        <option value="FALSE">FALSE</option>
+                        <option value="NOT GIVEN">NOT GIVEN</option>
                       </select>
                     </div>
                   </div>

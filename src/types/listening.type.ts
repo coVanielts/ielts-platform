@@ -8,7 +8,6 @@ interface ListeningQuestionBase {
     | 'matching_letters'
     | 'multiple_choice_multiple_answers'
     | 'map_labeling'
-    | 'true_false_not_given'
   questionRange: string
   instructions: string
 }
@@ -74,11 +73,6 @@ interface ListeningMapLabelingQuestion extends ListeningQuestionBase {
   images?: Array<{ id: string; url: string }> // Directus images
 }
 
-interface ListeningTrueFalseNotGivenQuestion extends ListeningQuestionBase {
-  type: 'true_false_not_given'
-  statement: string
-}
-
 export interface ListeningQuestionGroup {
   id: string
   type: 'listening'
@@ -89,7 +83,6 @@ export interface ListeningQuestionGroup {
     | 'matching_letters'
     | 'multiple_choice_multiple_answers'
     | 'map_labeling'
-    | 'true_false_not_given'
   questionRange?: string
   instructions?: string
   title: string
@@ -100,8 +93,6 @@ export interface ListeningQuestionGroup {
   letters?: string[]
   // For matching_letters questions - the list of statements to match (API format)
   answers?: string[]
-  // Whether to keep matching choices visible after selection (for drag-drop)
-  keep_matching_choices?: boolean
   questions: (
     | ListeningMultipleChoiceQuestion
     | ListeningWordGapQuestion
@@ -109,7 +100,6 @@ export interface ListeningQuestionGroup {
     | ListeningMatchingLettersQuestion
     | ListeningMultipleChoiceMultipleAnswersQuestion
     | ListeningMapLabelingQuestion
-    | ListeningTrueFalseNotGivenQuestion
   )[]
 }
 
