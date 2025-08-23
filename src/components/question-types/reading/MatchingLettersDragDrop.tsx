@@ -207,16 +207,20 @@ const MatchingLettersDragDrop: React.FC<MatchingLettersDragDropProps> = ({
       const question = questions[questionIndex]
       
       if (question && onAnswerChange) {
-        // Remove from previous question if it was already assigned
-        const previousQuestionId = Object.keys(selectedAnswers).find(
-          key => selectedAnswers[key] === letterAnswer
-        )
-        
+        // Find previous question assignment (handle array or string values)
+        const previousQuestionId = Object.keys(selectedAnswers).find(key => {
+          const val = selectedAnswers[key]
+          if (Array.isArray(val)) {
+            return val[0] === letterAnswer
+          }
+          return val === letterAnswer
+        })
+
         // Update the answer for this question with letter (A, B, C, D)
         onAnswerChange(question.id, letterAnswer)
-        
-        // If the letter was previously assigned to another question, clear that assignment
-        if (previousQuestionId && previousQuestionId !== question.id) {
+
+        // If reuse is NOT allowed, clear previous assignment so letter can't appear twice
+        if (!keepMatchingChoices && previousQuestionId && previousQuestionId !== question.id) {
           onAnswerChange(previousQuestionId, '')
         }
       }
