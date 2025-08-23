@@ -3,6 +3,7 @@
 import { useTestResults } from '@/components/api/useTestResults.api'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { appPaths } from '@/constants/appPaths'
+import { normalizeAnswer } from '@/utils/tfng-answer.utils'
 import { ArrowLeft, Award, CheckCircle, Clock, PenTool, Target, TrendingUp, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -83,6 +84,16 @@ export default function TestResultsPage() {
 
   // Check if any question has a correctAnswer (indicating answers can be revealed)
   const canRevealAnswers = results.questions.some(q => q.correctAnswer !== null)
+
+  // Helper function to format answers for display
+  const formatAnswer = (answer: any): string => {
+    if (Array.isArray(answer)) {
+      return answer.map(item => normalizeAnswer(item?.toString()) || item).join(', ')
+    }
+    
+    const answerStr = answer?.toString()
+    return normalizeAnswer(answerStr) || answerStr || '-'
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
@@ -372,56 +383,91 @@ export default function TestResultsPage() {
                 </div>
               </div>
 
-              {/* Detailed Results - Only show if answers can be revealed */}
+              {/* Answer Sheet Table - Only show if answers can be revealed */}
               {canRevealAnswers && (
                 <div className="card mb-8">
                   <div className="card-header">
-                    <h3 className="text-lg font-semibold text-neutral-900">Question-by-Question Results</h3>
+                    <h3 className="text-lg font-semibold text-neutral-900">Answer Sheet</h3>
                   </div>
                   <div className="card-body">
-                    <div className="space-y-4">
-                      {results.questions.map((question, index) => (
-                        <div
-                          key={question.questionNumber}
-                          className={`p-4 rounded-lg border ${
-                            question.isCorrect ? 'border-green-200 bg-green-25' : 'border-red-200 bg-red-25'
-                          }`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-3">
-                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-sm font-medium">
-                                {index + 1}
-                              </span>
-                              <span className="text-sm font-medium text-neutral-700">Question {index + 1}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              {question.isCorrect ? (
-                                <CheckCircle className="w-5 h-5 text-green-600" />
-                              ) : (
-                                <XCircle className="w-5 h-5 text-red-600" />
-                              )}
-                              <span className="text-sm font-medium">
-                                {question.points}/{question.maxPoints} points
-                              </span>
-                            </div>
+                    {/* Split questions into chunks of 10 and display them in a grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {Array.from({ length: Math.ceil(results.questions.length / 10) }, (_, chunkIndex) => {
+                        const startIndex = chunkIndex * 10
+                        const endIndex = Math.min(startIndex + 10, results.questions.length)
+                        const chunkQuestions = results.questions.slice(startIndex, endIndex)
+                        
+                        return (
+                          <div key={chunkIndex} className="overflow-x-auto">
+                            <table className="w-full text-xs border-collapse border border-neutral-300">
+                              <thead>
+                                <tr className="bg-neutral-100">
+                                  <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300 w-8">#</th>
+                                  <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300">Your</th>
+                                  <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300">Key</th>
+                                  <th className="text-center py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300 w-6">✓</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {chunkQuestions.map((question, index) => (
+                                  <tr 
+                                    key={question.questionNumber}
+                                    className={`border-b border-neutral-200 ${
+                                      question.isCorrect ? 'bg-green-50/50' : 'bg-red-50/50'
+                                    }`}>
+                                    <td className="py-1 px-2 font-medium text-neutral-600 text-xs border-r border-neutral-200">
+                                      {startIndex + index + 1}
+                                    </td>
+                                    <td className={`py-1 px-2 font-medium text-xs border-r border-neutral-200 ${
+                                      question.isCorrect ? 'text-green-700' : 'text-red-700'
+                                    }`}>
+                                      {formatAnswer(question.userAnswer) || '-'}
+                                    </td>
+                                    <td className="py-1 px-2 font-medium text-green-700 text-xs border-r border-neutral-200">
+                                      {question.correctAnswer !== null 
+                                        ? formatAnswer(question.correctAnswer)
+                                        : '-'}
+                                    </td>
+                                    <td className="py-1 px-2 text-center">
+                                      {question.isCorrect ? (
+                                        <span className="text-green-600 font-bold text-xs">✓</span>
+                                      ) : (
+                                        <span className="text-red-600 font-bold text-xs">✗</span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                                {/* Fill empty rows if less than 10 questions in this chunk */}
+                                {chunkQuestions.length < 10 && Array.from({ length: 10 - chunkQuestions.length }, (_, emptyIndex) => (
+                                  <tr key={`empty-${emptyIndex}`} className="border-b border-neutral-200">
+                                    <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                    <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                    <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                    <td className="py-1 px-2 text-center text-neutral-400">-</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
-                          <div className="text-sm text-neutral-600">
-                            <p>
-                              <span className="font-medium">Your answer:</span>{' '}
-                              {Array.isArray(question.userAnswer)
-                                ? question.userAnswer.join(', ')
-                                : question.userAnswer?.toString() || '-'}
-                            </p>
-                            {question.correctAnswer !== null && (
-                              <p>
-                                <span className="font-medium">Correct answer:</span>{' '}
-                                {Array.isArray(question.correctAnswer)
-                                  ? question.correctAnswer.join(', ')
-                                  : question.correctAnswer?.toString() || '-'}
-                              </p>
-                            )}
-                          </div>
+                        )
+                      })}
+                    </div>
+                    
+                    {/* Compact Summary */}
+                    <div className="mt-3 pt-2 border-t border-neutral-200">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-green-600 font-medium">
+                            ✓ {results.questions.filter(q => q.isCorrect).length}
+                          </span>
+                          <span className="text-red-600 font-medium">
+                            ✗ {results.questions.filter(q => !q.isCorrect).length}
+                          </span>
                         </div>
-                      ))}
+                        <span className="text-neutral-600 font-medium">
+                          Total: {results.questions.length}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

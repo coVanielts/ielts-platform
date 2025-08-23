@@ -30,7 +30,6 @@ export async function getDeepTestById(testId: number): Promise<Tests> {
       ],
     }),
   )
-
   return data as unknown as Tests
 }
 

@@ -5,6 +5,7 @@ import { ListeningMatching } from './ListeningMatching'
 import ListeningMatchingLettersDragDrop from './ListeningMatchingLettersDragDrop'
 import { ListeningMultipleChoice } from './ListeningMultipleChoice'
 import ListeningMultipleChoiceMultipleAnswers from './ListeningMultipleChoiceMultipleAnswers'
+import ListeningTrueFalseNotGiven from './ListeningTrueFalseNotGiven'
 import { ListeningWordGap } from './ListeningWordGap'
 
 interface ListeningQuestionGroupProps {
@@ -185,6 +186,7 @@ export const ListeningQuestionGroup: React.FC<ListeningQuestionGroupProps> = ({
             questions={transformedQuestions}
             selectedAnswers={(answers || localAnswers) as unknown as Record<string, string>}
             onAnswerChange={handleLocalAnswerChange}
+            keepMatchingChoices={group.keep_matching_choices}
           />
         </div>
       )
@@ -260,6 +262,28 @@ export const ListeningQuestionGroup: React.FC<ListeningQuestionGroupProps> = ({
             mapDescription={mapDescription}
             images={images}
           />
+        </div>
+      )
+    }
+
+    case 'true_false_not_given': {
+      const questions = group.questions.filter(q => q.type === 'true_false_not_given')
+      if (questions.length === 0) return null
+
+      return (
+        <div>
+          {questions.map((question, index) => (
+            <div key={question.id} ref={setQuestionRef(question.questionNumber)}>
+              <ListeningTrueFalseNotGiven
+                questionNumber={question.questionNumber}
+                statement={question.statement || ''}
+                selectedAnswer={localAnswers[question.id] as 'T' | 'F' | 'NG'}
+                onAnswerChange={(answer) => handleLocalAnswerChange(question.id, answer)}
+                isReadOnly={isReadOnly}
+                instructions={group.title || group.instructions || group.instruction}
+              />
+            </div>
+          ))}
         </div>
       )
     }

@@ -230,9 +230,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         setTimeRemaining(prev => {
           const newValue = prev - 1
           // Log every 10 seconds
-          if (newValue % 10 === 0 || newValue < 10) {
-            console.log('Time remaining:', newValue)
-          }
+            // periodic updates handled silently
           if (newValue <= 1) {
             clearInterval(timer)
             handleConfirmSubmit()
@@ -270,12 +268,12 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
 
     const saveProgress = () => {
       if (isSubmittingRef.current) {
-        console.log('Skipping progress save - test is being submitted')
         return
       }
 
       const currentTime = timeRemainingRef.current
       if (currentTime > 0) {
+<<<<<<< HEAD
         const progressData: any = {
           testId,
           studentId,
@@ -287,6 +285,9 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         const currentAudioTime = audioRef.current?.currentTime ?? 0
         const duration = audioRef.current?.duration ?? 0
 
+=======
+          // navigation debug suppressed
+>>>>>>> dev
         const audio = Math.ceil(duration - currentAudioTime)
 
         if (audio > 0 && currentAudioTime > 0) {
@@ -635,7 +636,13 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex w-full overflow-x-auto justify-start gap-2">
             {(() => {
+<<<<<<< HEAD
               if (testData.type === 'reading' && testData.parts) {
+=======
+              // navigation rendering
+              if (testData.type === 'reading' && testData.parts) {
+                // Calculate sequential question numbers for reading
+>>>>>>> dev
                 let globalQuestionNumber = 1
 
                 return testData.parts.map((part: any, index: number) => {
@@ -654,16 +661,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
                     displayNumber: number
                   }
 
-                  console.log(
-                    'Part',
-                    index + 1,
-                    'Questions:',
-                    sequentialQuestions.slice(0, 3).map((q: SequentialQuestion) => ({
-                      id: q.id,
-                      questionNumber: q.questionNumber,
-                      displayNumber: q.displayNumber,
-                    })),
-                  )
+                  // navigation debug suppressed for part preview
 
                   // Update global counter for next part
                   globalQuestionNumber += partQuestions.length
@@ -783,7 +781,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
                 ))
               }
 
-              console.log(testData)
+              // suppressed testData debug
 
               // Other Test Types Navigation
               return testData.questionGroups?.map((group: any, index: number) => (

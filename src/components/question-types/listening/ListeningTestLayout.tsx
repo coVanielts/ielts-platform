@@ -48,35 +48,26 @@ export default function ListeningTestLayout({
     const currentPartId = `listening-part-${displayPartNumber}`
     const partChanged = lastPartRef.current !== currentPartId
     
-    console.log('Listening scroll effect:', { currentPartId, lastPart: lastPartRef.current, partChanged })
-    
     if (partChanged) {
       lastPartRef.current = currentPartId
       
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
-        console.log('Listening: Setting scroll to 0')
         // Always scroll to top when part changes, with offset to account for fixed headers
         if (rightPanelScrollRef.current) {
-          console.log('Right panel scroll before:', rightPanelScrollRef.current.scrollTop)
           rightPanelScrollRef.current.scrollTop = 0
-          console.log('Right panel scroll after:', rightPanelScrollRef.current.scrollTop)
         }
         if (leftPanelScrollRef.current) {
-          console.log('Left panel scroll before:', leftPanelScrollRef.current.scrollTop)
           leftPanelScrollRef.current.scrollTop = 0
-          console.log('Left panel scroll after:', leftPanelScrollRef.current.scrollTop)
         }
         
         // Use setTimeout to override question scrollIntoView (which has 100ms delay)
         // The increased padding (pt-12, pt-8) ensures content is visible above fixed headers
         setTimeout(() => {
           if (rightPanelScrollRef.current) {
-            console.log('Listening: Final force scroll to top - right panel')
             rightPanelScrollRef.current.scrollTop = 0
           }
           if (leftPanelScrollRef.current) {
-            console.log('Listening: Final force scroll to top - left panel')
             leftPanelScrollRef.current.scrollTop = 0
           }
         }, 150)

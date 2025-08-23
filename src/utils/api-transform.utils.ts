@@ -64,6 +64,7 @@ export function transformDirectusReadingTest(data: Tests): {
               type: clientType as unknown as QuestionType,
               questionRange: '',
               instructions: '',
+              keep_matching_choices: gg.keep_matching_choices ?? false,
             }
             if (clientType === 'true_false_not_given') {
               return {
@@ -120,6 +121,7 @@ export function transformDirectusReadingTest(data: Tests): {
             endQuestion: end,
             contentDoc: gg && typeof gg.content === 'object' ? gg.content : undefined,
             // Add matching_letters specific fields
+            keep_matching_choices: gg.keep_matching_choices ?? false,
             answers: Array.isArray(gg?.answers) ? (gg.answers as string[]) : undefined,
             letters: Array.isArray(gg?.letters) ? (gg.letters as string[]) : undefined,
           } as ReadingQuestionGroup
@@ -164,6 +166,7 @@ export function transformDirectusListeningTest(data: Tests): ListeningTestData {
     images?: Array<{ directus_files_id?: string | null }>
     answers?: unknown
     letters?: unknown
+    keep_matching_choices?: boolean
   }
   type DPart = { id: number; order?: number | null; question_groups?: Array<{ question_groups_id: DGroup }> }
 
@@ -208,6 +211,7 @@ export function transformDirectusListeningTest(data: Tests): ListeningTestData {
         instruction: '',
         content: gg.content ?? undefined,
         questions: [],
+        keep_matching_choices: gg.keep_matching_choices ?? false,
       }
 
       // Map questions

@@ -34,6 +34,7 @@ interface QuestionGroupBase {
   title: string
   instruction: string
   questionType: string
+  keep_matching_choices?: boolean
   questions: Question[]
 }
 
@@ -123,6 +124,7 @@ interface ReadingSection {
 export interface ReadingQuestionGroup extends QuestionGroupBase {
   type: 'reading'
   questionType: ReadingQuestionType
+  keep_matching_choices?: boolean
   passageReference?: string // Reference to which part of the passage this group relates to
   startQuestion: number // Starting question number
   endQuestion: number // Ending question number
@@ -245,21 +247,7 @@ export interface MultipleChoiceMultipleAnswersQuestion extends Question {
 export interface TrueFalseNotGivenQuestion extends Question {
   type: 'true_false_not_given'
   statement: string
-  selectedAnswer?: 'TRUE' | 'FALSE' | 'NOT_GIVEN'
-  passage?: {
-    title: string
-    content: string[]
-  }
-}
-
-// Test Data interface
-interface TestData {
-  id: string
-  title: string
-  type: TestType
-  instruction: string
-  timeLimit: number
-  questionGroups: QuestionGroupBase[]
+  selectedAnswer?: 'T' | 'F' | 'NG'
   passage?: {
     title: string
     content: string[]
@@ -284,6 +272,7 @@ type DirectusQuestionGroup = {
   type: string
   title?: unknown
   content?: unknown
+  keep_matching_choices?: boolean
   questions?: DirectusQuestion[]
   images?: Array<{ directus_files_id?: string | null }>
   // optional extras we sometimes request
