@@ -29,18 +29,15 @@ export const useScrollMemory = (
           left: leftScroll,
           right: rightScroll,
         }
-        console.log('Saved scroll position for', partId, { left: leftScroll, right: rightScroll })
         visitedParts.current.add(partId)
       }
     }
   }, [leftPanelRef, rightPanelRef])
 
   const restoreScrollPosition = useCallback((partId: string, isFirstVisit: boolean) => {
-    console.log('Hook: Restoring scroll for part:', partId, { isFirstVisit })
     
     if (isFirstVisit) {
       // First visit - just scroll to top
-      console.log('Hook: First visit - scrolling to top')
       if (leftPanelRef.current) {
         leftPanelRef.current.scrollTop = 0
       }
@@ -51,7 +48,6 @@ export const useScrollMemory = (
     } else {
       // Restore saved position
       const savedPosition = scrollPositions.current[partId]
-      console.log('Hook: Restoring saved position:', savedPosition)
       
       if (savedPosition && savedPosition.left >= 0 && savedPosition.right >= 0) {
         if (leftPanelRef.current) {
@@ -62,7 +58,6 @@ export const useScrollMemory = (
         }
       } else {
         // No valid saved position, scroll to top
-        console.log('Hook: No valid saved position, scrolling to top')
         if (leftPanelRef.current) {
           leftPanelRef.current.scrollTop = 0
         }

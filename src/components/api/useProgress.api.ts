@@ -119,7 +119,7 @@ async function deleteProgress({ testId, studentId }: DeleteProgressParams) {
       }),
     )
 
-    console.log(existing)
+  // existing progress fetched
 
     if (Array.isArray(existing) && existing.length > 0) {
       await directus.request(

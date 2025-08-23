@@ -88,14 +88,6 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         ...(type === 'listening' ? { audioUrl: (transformed as any).audioUrl } : {}),
       })
 
-      // Debug log for practice test status
-      console.log('Test loaded:', {
-        name: raw.name,
-        type: raw.type,
-        is_practice_test: raw.is_practice_test,
-        isPractice: raw.is_practice_test || false
-      })
-
       setStartTime(new Date())
     }
     load()
@@ -237,9 +229,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         setTimeRemaining(prev => {
           const newValue = prev - 1
           // Log every 10 seconds
-          if (newValue % 10 === 0 || newValue < 10) {
-            console.log('Time remaining:', newValue)
-          }
+            // periodic updates handled silently
           if (newValue <= 1) {
             clearInterval(timer)
             handleConfirmSubmit()
@@ -277,22 +267,12 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
 
     const saveProgress = () => {
       if (isSubmittingRef.current) {
-        console.log('Skipping progress save - test is being submitted')
         return
       }
 
       const currentTime = timeRemainingRef.current
       if (currentTime > 0) {
-        const progressData: any = {
-          testId,
-          studentId,
-          remainingTime: currentTime,
-          currentPart,
-        }
-
-        const currentAudioTime = audioRef.current?.currentTime ?? 0
-        const duration = audioRef.current?.duration ?? 0
-
+          // navigation debug suppressed
         const audio = Math.ceil(duration - currentAudioTime)
 
         if (audio > 0 && currentAudioTime > 0) {
@@ -647,10 +627,8 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex w-full overflow-x-auto justify-start gap-2">
             {(() => {
-              // console.log('TestData type:', testData.type, 'Test data:', testData)
-              
+              // navigation rendering
               if (testData.type === 'reading' && testData.parts) {
-                console.log('Using reading navigation logic')
                 // Calculate sequential question numbers for reading
                 let globalQuestionNumber = 1
 
@@ -670,16 +648,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
                     displayNumber: number
                   }
 
-                  console.log(
-                    'Part',
-                    index + 1,
-                    'Questions:',
-                    sequentialQuestions.slice(0, 3).map((q: SequentialQuestion) => ({
-                      id: q.id,
-                      questionNumber: q.questionNumber,
-                      displayNumber: q.displayNumber,
-                    })),
-                  )
+                  // navigation debug suppressed for part preview
 
                   // Update global counter for next part
                   globalQuestionNumber += partQuestions.length
@@ -799,7 +768,7 @@ export default function TestRunnerWithoutInstructions({ testId, onCompleted }: P
                 ))
               }
 
-              console.log(testData)
+              // suppressed testData debug
 
               // Other Test Types Navigation
               return testData.questionGroups?.map((group: any, index: number) => (

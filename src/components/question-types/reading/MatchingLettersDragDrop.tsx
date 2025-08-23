@@ -246,7 +246,6 @@ const MatchingLettersDragDrop: React.FC<MatchingLettersDragDropProps> = ({
     if (keepMatchingChoices) {
       // TRUE: Always show all letters (allow reuse)
       // User can drag the same letter to multiple questions
-      console.log('DEBUG: keepMatchingChoices=true, showing all letters:', letters.length)
       return letters
     } else {
       // FALSE: Remove already assigned letters from available choices
@@ -267,14 +266,7 @@ const MatchingLettersDragDrop: React.FC<MatchingLettersDragDropProps> = ({
         return !isAlreadyUsed; // Only show letters that haven't been used
       })
       
-      console.log('DEBUG: keepMatchingChoices=false, filtering letters:', {
-        totalLetters: letters.length,
-        rawUsedAnswers: Object.values(selectedAnswers),
-        extractedUsedLetters: usedLetters,
-        availableLetters: availableLetters.length,
-        availableLettersList: availableLetters.map((letter, index) => getLetterLabel(index))
-      })
-      return availableLetters
+  return availableLetters
     }
   })()
 
