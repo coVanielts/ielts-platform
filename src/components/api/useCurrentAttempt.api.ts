@@ -39,20 +39,17 @@ const fetchAttempt = async (params: {
             ...(testGroupId ? { test_group: { _eq: testGroupId } } : {}),
           },
           sort: ['-attempt'],
-          limit: 500,
+          limit: 50,
           fields: ['id', 'attempt', 'question', 'answers', 'attachment', 'writing_submission'],
         }),
       ),
     ])
 
-    const maxAttemptResult = Array.isArray(results) && results[0]?.attempt ? Number(results[0].attempt) : 0
-    let maxAttemptAnswer = 0
-    if (Array.isArray(answers) && answers.length > 0) {
-      maxAttemptAnswer = answers.reduce((m, a: any) => Math.max(m, Number(a.attempt || 0)), 0)
-    }
+    const maxAttemptResult = results?.[0]?.attempt ? Number(results[0].attempt) : 0
+    const maxAttemptAnswer = answers?.reduce((m, a: any) => Math.max(m, Number(a.attempt || 0)), 0)
 
     // If there are existing answers with an attempt higher than results, resume that attempt; else next attempt after results
-    const currentAttempt = Math.max(maxAttemptResult + 1, maxAttemptAnswer || 0) || 1
+    const currentAttempt = Math.max(maxAttemptResult + 1, maxAttemptAnswer ?? 0) ?? 1
 
     const currentAttemptAnswers = Array.isArray(answers)
       ? (answers as any[])

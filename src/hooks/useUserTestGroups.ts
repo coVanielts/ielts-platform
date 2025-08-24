@@ -190,17 +190,11 @@ async function fetchUserTestGroups(): Promise<UserTestGroup[]> {
         if (currentProgress?.remaining_time) {
           const currentSkill = (currentProgress.test as Tests)?.type
 
-          if (currentSkill === 'Listening') {
-            testGroup.completedTests++
-          }
           if (currentSkill === 'Reading') {
-            testGroup.completedTests++
+            testGroup.completedTests = 1
           }
           if (currentSkill === 'Writing') {
-            testGroup.completedTests++
-          }
-          if (currentSkill === 'Speaking') {
-            testGroup.completedTests++
+            testGroup.completedTests = 2
           }
 
           testGroup.status = 'in_progress'

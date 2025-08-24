@@ -452,7 +452,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
     } else {
       // For other test types with questionGroups structure
       const group = testData?.questionGroups?.[partId - 1]
-      if (group && group.questions.length > 0) {
+      if (group?.questions?.length > 0) {
         setCurrentQuestion(group.questions[0].questionNumber)
       }
     }

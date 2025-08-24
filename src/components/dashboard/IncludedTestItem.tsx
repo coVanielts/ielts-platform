@@ -5,15 +5,20 @@ import { Clock } from 'lucide-react'
 interface IncludedTestItemProps {
   test: { id: string | number; name: string; type: string; time_limit?: number; status?: UserTest['status'] }
   isCompleted: boolean
+  isInProgress: boolean
 }
 
-export default function IncludedTestItem({ test, isCompleted }: IncludedTestItemProps) {
+export default function IncludedTestItem({ test, isCompleted, isInProgress }: IncludedTestItemProps) {
   const type = test.type.toLowerCase() as UserTest['type']
 
   return (
     <div
       className={`flex items-center gap-3 p-3 rounded-lg border ${
-        isCompleted ? 'border-green-200 bg-green-50' : 'border-neutral-200 bg-white'
+        isCompleted
+          ? 'border-green-200 bg-green-50'
+          : isInProgress
+            ? 'border-blue-200 bg-blue-50'
+            : 'border-neutral-200 bg-white'
       }`}>
       <div className={`w-8 h-8 rounded flex items-center justify-center ${getTypeColor(type)}`}>
         {getTypeIcon(type)}
@@ -21,8 +26,9 @@ export default function IncludedTestItem({ test, isCompleted }: IncludedTestItem
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <span className="text-sm text-neutral-800 truncate">{test.name}</span>
-          <span className={`text-xs font-medium ${isCompleted ? 'text-green-700' : 'text-neutral-500'}`}>
-            {isCompleted ? 'Completed' : 'Pending'}
+          <span
+            className={`text-xs font-medium ${isCompleted ? 'text-green-700' : isInProgress ? 'text-blue-700' : 'text-neutral-500'}`}>
+            {isCompleted ? 'Completed' : isInProgress ? 'In Progress' : 'Pending'}
           </span>
         </div>
         <div className="flex items-center gap-3 mt-1 text-[11px] text-neutral-500">

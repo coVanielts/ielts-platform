@@ -28,13 +28,6 @@ export default function LoginPage() {
               <LoginForm />
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-neutral-500">
-              © 2024 IELTS Learning Platform. Developed for IELTS preparation centers.
-            </p>
-          </div>
         </div>
       </div>
     </>

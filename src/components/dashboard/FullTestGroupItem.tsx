@@ -18,8 +18,6 @@ export default function FullTestGroupItem({ group }: FullTestGroupItemProps) {
     return ia - ib
   })
 
-  const isCompleted = group.completedTests >= group.totalTests
-
   return (
     <div className="card card-hover">
       <div className="card-body">
@@ -88,6 +86,7 @@ export default function FullTestGroupItem({ group }: FullTestGroupItemProps) {
                 key={test.id}
                 test={{ ...test, status: (test as any).status }}
                 isCompleted={idx < group.completedTests}
+                isInProgress={idx === group.completedTests && group.status === 'in_progress'}
               />
             ))}
           </div>

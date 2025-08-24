@@ -251,30 +251,6 @@ export default function FullTestPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      {/* <header className="ielts-header sticky top-0 z-40">
-        <div className="max-w-screen-2xl mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900">
-                <ArrowLeft className="w-5 h-5" />
-                <span className="font-medium">Dashboard</span>
-              </Link>
-              <div className="w-px h-6 bg-neutral-300" />
-              <div>
-                <h1 className="text-lg font-semibold text-neutral-900">IELTS Full Practice Test</h1>
-                <p className="text-sm text-neutral-600">
-                  {currentSection === 'listening' && 'Listening Test'}
-                  {currentSection === 'reading' && 'Reading Test'}
-                  {currentSection === 'writing' && 'Writing Test'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header> */}
-
-      {/* Section Tabs */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-screen-2xl mx-auto px-4">
           <div className="flex space-x-1">
