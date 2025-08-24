@@ -1,89 +1,17 @@
 'use client'
 
 import LoadingSpinner from '@/components/LoadingSpinner'
-import { initializeDirectus } from '@/libs/directus'
-import { Tests } from '@/types/collections.type'
-import { readItem, readItems, readMe } from '@directus/sdk'
+import { useTestAttempts } from '@/hooks/useTestAttempts'
 import { ArrowLeft, Calendar, Clock, FileText, Play, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-
-interface TestAttempt {
-  id: number
-  attempt: number
-  date_created: string
-  time_spent: number | null
-  score?: number
-  band_score?: number
-  number_of_correct_answers?: number
-}
-
-interface TestInfo {
-  id: number
-  name: string
-  tests: Tests[]
-}
 
 export default function TestGroupAttemptsPage() {
   const params = useParams()
   const testGroupId = params.id as string
-  const [loading, setLoading] = useState(true)
-  const [attempts, setAttempts] = useState<TestAttempt[]>([])
-  const [testInfo, setTestInfo] = useState<TestInfo | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchAttempts = async () => {
-      try {
-        setLoading(true)
-
-        // Initialize Directus client
-        const directus = await initializeDirectus()
-
-        // Get current user
-        const user = await directus.request(readMe())
-        const userId = user.id
-
-        // Fetch test info
-        const testData = await directus.request(
-          readItem('test_groups', parseInt(testGroupId), {
-            fields: ['id', 'name', 'tests'],
-          }),
-        )
-
-        if (testData) {
-          setTestInfo(testData as TestInfo)
-        } else {
-          throw new Error('Test not found')
-        }
-
-        // Fetch results for this test
-        const resultsData = await directus.request(
-          readItems('results', {
-            filter: {
-              test_group: { _eq: parseInt(testGroupId) },
-              student: { _eq: userId },
-            },
-            sort: ['-date_created'],
-            fields: ['id', 'attempt', 'date_created', 'time_spent', 'band_score', 'number_of_correct_answers'],
-          }),
-        )
-
-        if (resultsData && resultsData.length > 0) {
-          setAttempts(resultsData as TestAttempt[])
-        }
-
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching attempts:', error)
-        setError('An error occurred while loading test attempts.')
-        setLoading(false)
-      }
-    }
-
-    fetchAttempts()
-  }, [testGroupId])
+  // Use React Query hook
+  const { data, isLoading, error } = useTestAttempts(testGroupId, true)
 
   const formatTime = (seconds: number | null): string => {
     if (!seconds) return '0:00'
@@ -102,7 +30,7 @@ export default function TestGroupAttemptsPage() {
     })
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading test attempts..." className="py-12" />
@@ -115,7 +43,7 @@ export default function TestGroupAttemptsPage() {
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-neutral-900 mb-2">Unable to load attempts</h2>
-          <p className="text-neutral-600 mb-4">{error}</p>
+          <p className="text-neutral-600 mb-4">{error.message}</p>
           <Link href="/dashboard" className="btn btn-primary">
             Back to Dashboard
           </Link>
@@ -123,6 +51,8 @@ export default function TestGroupAttemptsPage() {
       </div>
     )
   }
+
+  const { testInfo, attempts } = data!
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
@@ -199,17 +129,25 @@ export default function TestGroupAttemptsPage() {
                             </div>
                             <div className="flex items-center space-x-1">
                               <Clock className="w-4 h-4" />
-                              <span>Time spent: {formatTime(attempt.time_spent)}</span>
+                              <span>
+                                Time spent:{' '}
+                                {formatTime('totalTimeSpent' in attempt ? attempt.totalTimeSpent : attempt.time_spent)}
+                              </span>
                             </div>
                             {attempt.number_of_correct_answers !== undefined && (
                               <div className="font-medium text-green-600">
-                                Score: {attempt.number_of_correct_answers}
+                                Score: {attempt.number_of_correct_answers.toFixed(1)}
                               </div>
                             )}
                             {attempt.band_score !== undefined && (
-                              <div className="font-medium text-blue-600">Band: {attempt.band_score}</div>
+                              <div className="font-medium text-blue-600">Band: {attempt.band_score.toFixed(1)}</div>
                             )}
                           </div>
+                          {'mergedAttempts' in attempt && attempt.mergedAttempts.length > 1 && (
+                            <div className="mt-2 text-xs text-neutral-500">
+                              Combined {attempt.mergedAttempts.length} individual test results
+                            </div>
+                          )}
                         </div>
                         <Link
                           href={`/test/full/${testGroupId}/results?attempt=${attempt.attempt || 1}`}

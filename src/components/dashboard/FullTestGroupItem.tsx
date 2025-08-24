@@ -50,7 +50,7 @@ export default function FullTestGroupItem({ group }: FullTestGroupItemProps) {
           <div className="flex items-center space-x-2">
             {group.status === 'completed' ? (
               <>
-                <Link href={`/test/${group.id}/attempts`} className="btn btn-outline">
+                <Link href={`${appPaths.fullTests}/${group.id}/attempts`} className="btn btn-outline">
                   <FileText className="w-4 h-4 mr-2" />
                   View Results
                 </Link>
