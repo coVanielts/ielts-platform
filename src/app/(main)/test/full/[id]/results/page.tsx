@@ -33,6 +33,24 @@ interface FullTestResult {
     timeSpent: string
     completedAt: string
     status: 'completed' | 'pending' | 'graded'
+    feedbackFiles?: Array<{
+      id: string
+      filename: string
+      url: string
+    }>
+  }
+  speaking?: {
+    testId: number
+    bandScore: number | null
+    percentage: number
+    timeSpent: string
+    completedAt: string
+    status: 'completed' | 'pending' | 'graded'
+    feedbackFiles?: Array<{
+      id: string
+      filename: string
+      url: string
+    }>
   }
   overallBandScore: number | null
   completedAt: string
@@ -100,6 +118,7 @@ export default function FullTestResultsPage() {
           timeSpent: writingResult.timeSpent,
           completedAt: writingResult.completedAt,
           status: writingResult.bandScore !== null ? 'graded' : 'pending', // Writing usually needs manual grading
+          feedbackFiles: writingResult.feedbackFiles || []
         }
       }
 
@@ -512,6 +531,28 @@ export default function FullTestResultsPage() {
                 <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
                   {writingResult.bandScore ? `Band: ${writingResult.bandScore}` : 'Pending assessment'}
                 </div>
+                
+                {/* Feedback Files */}
+                {writingResult.feedbackFiles && writingResult.feedbackFiles.length > 0 && (
+                  <div className="mt-2">
+                    <h5 className="text-xs font-medium text-neutral-600 mb-1">Teacher Feedback:</h5>
+                    <div className="space-y-1">
+                      {writingResult.feedbackFiles.map((file, index) => (
+                        <div key={file.id} className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
+                          <span className="text-xs text-blue-700">{file.filename}</span>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => window.open(file.url, '_blank')}
+                              className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                            >
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

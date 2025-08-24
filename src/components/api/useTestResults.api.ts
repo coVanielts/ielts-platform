@@ -13,6 +13,14 @@ export interface QuestionResult {
   maxPoints: number
 }
 
+export interface FeedbackFile {
+  id: string
+  filename: string
+  url: string
+  filesize?: number
+  type?: string
+}
+
 export interface TestResult {
   testId: string
   testTitle: string
@@ -29,6 +37,7 @@ export interface TestResult {
     improvements: string[]
     nextSteps: string[]
   }
+  feedbackFiles?: FeedbackFile[]
   // Writing specific fields
   task_1_TA?: number | null
   task_1_CC?: number | null
@@ -139,6 +148,8 @@ const fetchTestResults = async ({
         sort: ['-date_created'],
         fields: [
           '*',
+          'feedback.*',
+          'feedback.directus_files_id.*',
           'answers.question.id',
           'answers.question.order',
           'answers.answers',
@@ -147,7 +158,10 @@ const fetchTestResults = async ({
         ] as any,
       }),
     )) as unknown as Results[]
-
+    
+    // Debug: Log the actual response
+    console.log('DEBUG - resultsData:', JSON.stringify(resultsData, null, 2))
+    
     if (resultsData && resultsData.length > 0) {
       const resultData = resultsData[0]
       // Handle both string and object test reference
@@ -162,6 +176,23 @@ const fetchTestResults = async ({
 
       // Writing and Speaking tests may be pending manual review
       if (testType === 'writing' && !resultData.band_score) {
+        // Process feedback files
+        const feedbackFiles: FeedbackFile[] = (resultData.feedback?.map((feedbackItem: any) => {
+          console.log('DEBUG - Processing pending feedback item:', feedbackItem)
+          const file = feedbackItem.directus_files_id
+          if (!file) {
+            console.log('DEBUG - No directus_files_id found in pending feedback item')
+            return null
+          }
+          return {
+            id: file.id,
+            filename: file.filename_download || file.filename_disk,
+            url: `${process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://ielts-admin-7ic7j.ondigitalocean.app'}/assets/${file.id}`,
+            filesize: file.filesize ? parseInt(file.filesize) : undefined,
+            type: file.type,
+          }
+        }).filter(Boolean) || []) as FeedbackFile[]
+
         const pendingResults: TestResult = {
           testId: testId,
           testTitle:
@@ -182,6 +213,7 @@ const fetchTestResults = async ({
             improvements: [],
             nextSteps: [],
           },
+          feedbackFiles,
           // Include all writing-specific fields from the result
           task_1_TA: resultData.task_1_TA,
           task_1_CC: resultData.task_1_CC,
@@ -231,6 +263,25 @@ const fetchTestResults = async ({
       const totalQuestions = 40
       const percentage = Math.round((finalCorrectCount / totalQuestions) * 100)
 
+      // Process feedback files
+      const feedbackFiles: FeedbackFile[] = (resultData.feedback?.map((feedbackItem: any) => {
+        console.log('DEBUG - Processing feedback item:', feedbackItem)
+        const file = feedbackItem.directus_files_id
+        if (!file) {
+          console.log('DEBUG - No directus_files_id found in feedback item')
+          return null
+        }
+        return {
+          id: file.id,
+          filename: file.filename_download || file.filename_disk,
+          url: `${process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://ielts-admin-7ic7j.ondigitalocean.app'}/assets/${file.id}`,
+          filesize: file.filesize ? parseInt(file.filesize) : undefined,
+          type: file.type,
+        }
+      }).filter(Boolean) || []) as FeedbackFile[]
+      
+      console.log('DEBUG - Final feedbackFiles:', feedbackFiles)
+
       const testResult: TestResult = {
         testId: testId,
         testTitle:
@@ -252,6 +303,7 @@ const fetchTestResults = async ({
           improvements: ['Review incorrect answers to improve understanding'],
           nextSteps: ['Practice more tests to improve your score'],
         },
+        feedbackFiles,
         // Include all specific fields based on test type
         task_1_TA: resultData.task_1_TA,
         task_1_CC: resultData.task_1_CC,
