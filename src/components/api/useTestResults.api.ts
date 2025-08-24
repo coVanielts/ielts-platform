@@ -96,17 +96,25 @@ const fetchTestResults = async ({
     const classIds = classTranslations.map((translation: any) => translation.classes_id)
 
     if (classIds.length > 0) {
-      // Check if any of user's classes have reveal_answer permission for this test
+      // Build reveal_answer filter: class must be in user's classes AND (tests match OR test_groups match when provided)
+      const revealFilter: any = { _and: [{ class: { _in: classIds } }] }
+
+      // If we're viewing a test group results page, require the reveal_answer to include that test_group
+      if (testGroupId !== undefined) {
+        revealFilter._and.push({ test_groups: { test_groups_id: { _eq: parseInt(testGroupId) } } })
+      } else {
+        // For single-test view, allow reveal if reveal_answer lists the test
+        revealFilter._and.push({ tests: { tests_id: { _eq: parseInt(testId) } } })
+      }
+
+      // Check if any of user's classes have reveal_answer permission for this test or test group
       const revealAnswers = await directus.request(
         readItems('reveal_answer', {
-          filter: {
-            _and: [{ class: { _in: classIds } }, { tests: { tests_id: { _eq: parseInt(testId) } } }],
-          },
+          filter: revealFilter,
           limit: 1,
         }),
       )
 
-      // Always allow answers to be revealed for testing
       canRevealAnswers = revealAnswers && revealAnswers.length > 0
     }
 

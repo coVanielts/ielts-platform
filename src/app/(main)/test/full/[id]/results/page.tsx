@@ -3,6 +3,7 @@
 import { useTestResults } from '@/components/api/useTestResults.api'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useTestGroupDetail } from '@/hooks/useTestGroupDetail'
+import { normalizeAnswer } from '@/utils/tfng-answer.utils'
 import { ArrowLeft, Award, BarChart3, BookOpen, Headphones, PenTool, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -178,6 +179,19 @@ export default function FullTestResultsPage() {
     })
   }
 
+  const canRevealAnswers =
+    !!(listeningResult?.questions?.some((q: any) => q.correctAnswer !== null) ||
+      readingResult?.questions?.some((q: any) => q.correctAnswer !== null))
+
+  const formatAnswer = (answer: any): string => {
+    if (Array.isArray(answer)) {
+      return answer.map((item: any) => normalizeAnswer(item?.toString()) || item).join(', ')
+    }
+
+    const answerStr = answer?.toString()
+    return normalizeAnswer(answerStr) || answerStr || '-'
+  }
+
   if (isLoading || groupLoading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
@@ -264,11 +278,13 @@ export default function FullTestResultsPage() {
                     <span className="font-medium">{fullTestResult.listening.timeSpent}</span>
                   </div>
                 </div>
-                <Link
-                  href={`/test/${fullTestResult.listening.testId}/results`}
-                  className="block w-full text-center py-2 px-4 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
-                  View Detailed Results
-                </Link>
+                {canRevealAnswers && (
+                  <Link
+                    href={`/test/${fullTestResult.listening.testId}/results`}
+                    className="block w-full text-center py-2 px-4 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+                    View Detailed Results
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="text-center text-neutral-500 py-8">
@@ -306,11 +322,13 @@ export default function FullTestResultsPage() {
                     <span className="font-medium">{fullTestResult.reading.timeSpent}</span>
                   </div>
                 </div>
-                <Link
-                  href={`/test/${fullTestResult.reading.testId}/results`}
-                  className="block w-full text-center py-2 px-4 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium">
-                  View Detailed Results
-                </Link>
+                {canRevealAnswers && (
+                  <Link
+                    href={`/test/${fullTestResult.reading.testId}/results`}
+                    className="block w-full text-center py-2 px-4 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium">
+                    View Detailed Results
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="text-center text-neutral-500 py-8">
@@ -348,11 +366,13 @@ export default function FullTestResultsPage() {
                     <span className="font-medium">{fullTestResult.writing.timeSpent}</span>
                   </div>
                 </div>
-                <Link
-                  href={`/test/${fullTestResult.writing.testId}/results`}
-                  className="block w-full text-center py-2 px-4 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium">
-                  View Detailed Results
-                </Link>
+                {canRevealAnswers && (
+                  <Link
+                    href={`/test/${fullTestResult.writing.testId}/results`}
+                    className="block w-full text-center py-2 px-4 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium">
+                    View Detailed Results
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="text-center text-neutral-500 py-8">
@@ -362,124 +382,124 @@ export default function FullTestResultsPage() {
           </div>
         </div>
 
-        {/* Quick Answer Overview */}
-        {(listeningResult?.questions || readingResult?.questions) && (
+        {/* Quick Answer Overview - only when server allowed reveal */}
+        {canRevealAnswers && (listeningResult?.questions || readingResult?.questions) && (
           <div className="bg-white rounded-lg border border-neutral-200 p-4 mt-6">
             <h3 className="text-lg font-semibold text-neutral-900 mb-3">Answer Overview</h3>
-            
-            {/* Listening Answers Table */}
+
+            {/* Listening chunked tables */}
             {listeningResult?.questions && (
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <Headphones className="w-4 h-4 mr-2" />
                   <h4 className="font-medium text-neutral-800 text-sm">Listening ({listeningResult.questions.length})</h4>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-neutral-300">
-                        <th className="text-left py-1 px-2 font-semibold text-neutral-700 w-8">#</th>
-                        <th className="text-left py-1 px-2 font-semibold text-neutral-700">Your</th>
-                        <th className="text-left py-1 px-2 font-semibold text-neutral-700">Key</th>
-                        <th className="text-center py-1 px-2 font-semibold text-neutral-700 w-8">✓</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {listeningResult.questions.slice(0, 15).map((question, index) => (
-                        <tr key={index} className={`border-b border-neutral-100 hover:bg-neutral-50 ${question.isCorrect ? 'bg-green-50/50' : 'bg-red-50/50'}`}>
-                          <td className="py-1 px-2 font-medium text-neutral-600 text-xs">{index + 1}</td>
-                          <td className={`py-1 px-2 font-medium text-xs ${question.isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                            {Array.isArray(question.userAnswer) ? question.userAnswer.join(', ') : question.userAnswer?.toString() || '-'}
-                          </td>
-                          <td className="py-1 px-2 font-medium text-green-700 text-xs">
-                            {question.correctAnswer !== null 
-                              ? (Array.isArray(question.correctAnswer) ? question.correctAnswer.join(', ') : question.correctAnswer?.toString())
-                              : '-'}
-                          </td>
-                          <td className="py-1 px-2 text-center">
-                            {question.isCorrect ? (
-                              <span className="text-green-600 font-bold text-xs">✓</span>
-                            ) : (
-                              <span className="text-red-600 font-bold text-xs">✗</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                      {listeningResult.questions.length > 15 && (
-                        <tr>
-                          <td colSpan={4} className="py-1 px-2 text-center text-neutral-500 text-xs">
-                            ... +{listeningResult.questions.length - 15} more
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto">
+                  {Array.from({ length: Math.ceil(listeningResult.questions.length / 10) }, (_, chunkIndex) => {
+                    const startIndex = chunkIndex * 10
+                    const endIndex = Math.min(startIndex + 10, listeningResult.questions.length)
+                    const chunkQuestions = listeningResult.questions.slice(startIndex, endIndex)
+
+                    return (
+                      <div key={chunkIndex} className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse border border-neutral-300">
+                          <thead>
+                            <tr className="bg-neutral-100">
+                              <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300 w-8">#</th>
+                              <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300">Your</th>
+                              <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300">Key</th>
+                              <th className="text-center py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300 w-6">✓</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {chunkQuestions.map((question: any, index: number) => (
+                              <tr key={question.questionNumber ?? index} className={`border-b border-neutral-200 ${question.isCorrect ? 'bg-green-50/50' : 'bg-red-50/50'}`}>
+                                <td className="py-1 px-2 font-medium text-neutral-600 text-xs border-r border-neutral-200">{startIndex + index + 1}</td>
+                                <td className={`py-1 px-2 font-medium text-xs border-r border-neutral-200 ${question.isCorrect ? 'text-green-700' : 'text-red-700'}`}>{formatAnswer(question.userAnswer) || '-'}</td>
+                                <td className="py-1 px-2 font-medium text-green-700 text-xs border-r border-neutral-200">{question.correctAnswer !== null ? formatAnswer(question.correctAnswer) : '-'}</td>
+                                <td className="py-1 px-2 text-center">{question.isCorrect ? <span className="text-green-600 font-bold text-xs">✓</span> : <span className="text-red-600 font-bold text-xs">✗</span>}</td>
+                              </tr>
+                            ))}
+
+                            {chunkQuestions.length < 10 && Array.from({ length: 10 - chunkQuestions.length }, (_, emptyIndex) => (
+                              <tr key={`empty-${emptyIndex}`} className="border-b border-neutral-200">
+                                <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                <td className="py-1 px-2 text-center text-neutral-400">-</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )
+                  })}
                 </div>
                 <div className="mt-2 text-xs text-neutral-600">
-                  <span className="text-green-600 font-medium">✓ {listeningResult.questions.filter(q => q.isCorrect).length}</span>
+                  <span className="text-green-600 font-medium">✓ {listeningResult.questions.filter((q: any) => q.isCorrect).length}</span>
                   {' / '}
                   <span className="font-medium">{listeningResult.questions.length}</span>
                 </div>
               </div>
             )}
-            
-            {/* Reading Answers Table */}
+
+            {/* Reading chunked tables */}
             {readingResult?.questions && (
               <div className="mb-4">
                 <div className="flex items-center mb-2">
                   <BookOpen className="w-4 h-4 mr-2" />
                   <h4 className="font-medium text-neutral-800 text-sm">Reading ({readingResult.questions.length})</h4>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-neutral-300">
-                        <th className="text-left py-1 px-2 font-semibold text-neutral-700 w-8">#</th>
-                        <th className="text-left py-1 px-2 font-semibold text-neutral-700">Your</th>
-                        <th className="text-left py-1 px-2 font-semibold text-neutral-700">Key</th>
-                        <th className="text-center py-1 px-2 font-semibold text-neutral-700 w-8">✓</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {readingResult.questions.slice(0, 15).map((question, index) => (
-                        <tr key={index} className={`border-b border-neutral-100 hover:bg-neutral-50 ${question.isCorrect ? 'bg-green-50/50' : 'bg-red-50/50'}`}>
-                          <td className="py-1 px-2 font-medium text-neutral-600 text-xs">{index + 1}</td>
-                          <td className={`py-1 px-2 font-medium text-xs ${question.isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                            {Array.isArray(question.userAnswer) ? question.userAnswer.join(', ') : question.userAnswer?.toString() || '-'}
-                          </td>
-                          <td className="py-1 px-2 font-medium text-green-700 text-xs">
-                            {question.correctAnswer !== null 
-                              ? (Array.isArray(question.correctAnswer) ? question.correctAnswer.join(', ') : question.correctAnswer?.toString())
-                              : '-'}
-                          </td>
-                          <td className="py-1 px-2 text-center">
-                            {question.isCorrect ? (
-                              <span className="text-green-600 font-bold text-xs">✓</span>
-                            ) : (
-                              <span className="text-red-600 font-bold text-xs">✗</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                      {readingResult.questions.length > 15 && (
-                        <tr>
-                          <td colSpan={4} className="py-1 px-2 text-center text-neutral-500 text-xs">
-                            ... +{readingResult.questions.length - 15} more
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto">
+                  {Array.from({ length: Math.ceil(readingResult.questions.length / 10) }, (_, chunkIndex) => {
+                    const startIndex = chunkIndex * 10
+                    const endIndex = Math.min(startIndex + 10, readingResult.questions.length)
+                    const chunkQuestions = readingResult.questions.slice(startIndex, endIndex)
+
+                    return (
+                      <div key={chunkIndex} className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse border border-neutral-300">
+                          <thead>
+                            <tr className="bg-neutral-100">
+                              <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300 w-8">#</th>
+                              <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300">Your</th>
+                              <th className="text-left py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300">Key</th>
+                              <th className="text-center py-1 px-2 font-semibold text-neutral-700 border-b border-neutral-300 w-6">✓</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {chunkQuestions.map((question: any, index: number) => (
+                              <tr key={question.questionNumber ?? index} className={`border-b border-neutral-200 ${question.isCorrect ? 'bg-green-50/50' : 'bg-red-50/50'}`}>
+                                <td className="py-1 px-2 font-medium text-neutral-600 text-xs border-r border-neutral-200">{startIndex + index + 1}</td>
+                                <td className={`py-1 px-2 font-medium text-xs border-r border-neutral-200 ${question.isCorrect ? 'text-green-700' : 'text-red-700'}`}>{formatAnswer(question.userAnswer) || '-'}</td>
+                                <td className="py-1 px-2 font-medium text-green-700 text-xs border-r border-neutral-200">{question.correctAnswer !== null ? formatAnswer(question.correctAnswer) : '-'}</td>
+                                <td className="py-1 px-2 text-center">{question.isCorrect ? <span className="text-green-600 font-bold text-xs">✓</span> : <span className="text-red-600 font-bold text-xs">✗</span>}</td>
+                              </tr>
+                            ))}
+
+                            {chunkQuestions.length < 10 && Array.from({ length: 10 - chunkQuestions.length }, (_, emptyIndex) => (
+                              <tr key={`empty-${emptyIndex}`} className="border-b border-neutral-200">
+                                <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                <td className="py-1 px-2 text-xs border-r border-neutral-200 text-neutral-400">-</td>
+                                <td className="py-1 px-2 text-center text-neutral-400">-</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )
+                  })}
                 </div>
                 <div className="mt-2 text-xs text-neutral-600">
-                  <span className="text-green-600 font-medium">✓ {readingResult.questions.filter(q => q.isCorrect).length}</span>
+                  <span className="text-green-600 font-medium">✓ {readingResult.questions.filter((q: any) => q.isCorrect).length}</span>
                   {' / '}
                   <span className="font-medium">{readingResult.questions.length}</span>
                 </div>
               </div>
             )}
-            
-            {/* Writing Status */}
+
+            {/* Writing status */}
             {writingResult && (
               <div className="mb-3">
                 <div className="flex items-center mb-2">
@@ -487,20 +507,14 @@ export default function FullTestResultsPage() {
                   <h4 className="font-medium text-neutral-800 text-sm">Writing</h4>
                 </div>
                 <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-                  {writingResult.bandScore 
-                    ? `Band: ${writingResult.bandScore}` 
-                    : 'Pending assessment'}
+                  {writingResult.bandScore ? `Band: ${writingResult.bandScore}` : 'Pending assessment'}
                 </div>
               </div>
             )}
-            
-            <div className="text-xs text-neutral-500 mt-3 pt-2 border-t border-neutral-200">
-              Click "View Detailed Results" above for full analysis
-            </div>
+
+            <div className="text-xs text-neutral-500 mt-3 pt-2 border-t border-neutral-200">Click "View Detailed Results" above for full analysis</div>
           </div>
         )}
-
-
       </div>
     </div>
   )
