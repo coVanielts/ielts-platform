@@ -2,92 +2,17 @@
 
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { appPaths } from '@/constants/appPaths'
-import { initializeDirectus } from '@/libs/directus'
-import { readItems, readMe } from '@directus/sdk'
+import { useTestAttempts } from '@/hooks/useTestAttempts'
 import { ArrowLeft, Calendar, Clock, FileText, Play, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-
-interface TestAttempt {
-  id: number
-  attempt: number
-  date_created: string
-  time_spent: number | null
-  score?: number
-  band_score?: number
-  number_of_correct_answers?: number
-}
-
-interface TestInfo {
-  id: number
-  name: string
-  type: string
-  time_limit: number
-}
 
 export default function TestAttemptsPage() {
   const params = useParams()
   const testId = params.id as string
-  const [loading, setLoading] = useState(true)
-  const [attempts, setAttempts] = useState<TestAttempt[]>([])
-  const [testInfo, setTestInfo] = useState<TestInfo | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchAttempts = async () => {
-      try {
-        setLoading(true)
-
-        // Initialize Directus client
-        const directus = await initializeDirectus()
-
-        // Get current user
-        const user = await directus.request(readMe())
-        const userId = user.id
-
-        // Fetch test info
-        const testData = await directus.request(
-          readItems('tests', {
-            filter: {
-              id: { _eq: parseInt(testId) },
-            },
-            fields: ['id', 'name', 'type', 'time_limit'],
-          }),
-        )
-
-        if (testData && testData.length > 0) {
-          setTestInfo(testData[0] as TestInfo)
-        } else {
-          throw new Error('Test not found')
-        }
-
-        // Fetch results for this test
-        const resultsData = await directus.request(
-          readItems('results', {
-            filter: {
-              test: { _eq: parseInt(testId) },
-              student: { _eq: userId },
-            },
-            sort: ['-date_created'],
-            fields: ['id', 'attempt', 'date_created', 'time_spent', 'band_score', 'number_of_correct_answers'],
-          }),
-        )
-
-        if (resultsData && resultsData.length > 0) {
-          setAttempts(resultsData as TestAttempt[])
-        }
-
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching attempts:', error)
-        setError('An error occurred while loading test attempts.')
-        setLoading(false)
-      }
-    }
-
-    fetchAttempts()
-  }, [testId])
+  // Use React Query hook
+  const { data, isLoading, error } = useTestAttempts(testId, false)
 
   const formatTime = (seconds: number | null): string => {
     if (!seconds) return '0:00'
@@ -106,7 +31,7 @@ export default function TestAttemptsPage() {
     })
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading test attempts..." className="py-12" />
@@ -119,7 +44,7 @@ export default function TestAttemptsPage() {
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-neutral-900 mb-2">Unable to load attempts</h2>
-          <p className="text-neutral-600 mb-4">{error}</p>
+          <p className="text-neutral-600 mb-4">{error.message}</p>
           <Link href="/dashboard" className="btn btn-primary">
             Back to Dashboard
           </Link>
@@ -127,6 +52,8 @@ export default function TestAttemptsPage() {
       </div>
     )
   }
+
+  const { testInfo, attempts } = data!
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
