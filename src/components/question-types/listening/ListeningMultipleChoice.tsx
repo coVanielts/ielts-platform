@@ -141,7 +141,7 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
                 {choices.map((choice, index) => (
                   <label
                     key={choice.id}
-                    className={`flex items-start space-x-2 p-1.5 rounded-md border cursor-pointer transition-colors ${
+                    className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
                       selectedAnswers[question.id] === choice.id
                         ? 'border-primary-500 bg-primary-50'
                         : 'border-neutral-200 hover:border-primary-300 hover:bg-primary-25'
@@ -157,7 +157,10 @@ export const ListeningMultipleChoice: React.FC<ListeningMultipleChoiceProps> = (
                         disabled={isReadOnly}
                         className="mt-0.5 h-3 w-3 text-primary-600 focus:ring-primary-500 border-neutral-300"
                       />
-                      <span className="w-5 h-5 flex items-center justify-center bg-neutral-100 rounded-full text-xs font-medium text-neutral-600 flex-shrink-0">
+                      <span
+                        className="w-5 h-5 flex items-center justify-center bg-neutral-100 rounded-full text-xs font-medium text-neutral-600 flex-shrink-0"
+                        style={{ transform: 'translateY(2px)' }}
+                      >
                         {String.fromCharCode(65 + index)}
                       </span>
                     </div>

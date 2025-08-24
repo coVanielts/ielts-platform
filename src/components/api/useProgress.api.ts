@@ -132,6 +132,8 @@ async function deleteProgress({ testId, testGroupId, studentId }: DeleteProgress
       }),
     )
 
+  // existing progress fetched
+
     if (Array.isArray(existing) && existing.length > 0) {
       await directus.request(
         deleteItems(

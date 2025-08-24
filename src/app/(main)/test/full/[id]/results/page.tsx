@@ -500,54 +500,7 @@ export default function FullTestResultsPage() {
           </div>
         )}
 
-        {/* Performance Summary */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-6 mt-6">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-4">Performance Summary</h3>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {[fullTestResult.listening, fullTestResult.reading, fullTestResult.writing].filter(Boolean).length}
-              </div>
-              <div className="text-sm text-neutral-600">Sections Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {Math.round(
-                  [
-                    fullTestResult.listening?.percentage || 0,
-                    fullTestResult.reading?.percentage || 0,
-                    fullTestResult.writing?.percentage || 0,
-                  ].reduce((sum, p) => sum + p, 0) / 3,
-                )}
-                %
-              </div>
-              <div className="text-sm text-neutral-600">Average Accuracy</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{fullTestResult.overallBandScore || 'TBD'}</div>
-              <div className="text-sm text-neutral-600">Overall Band Score</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Next Steps */}
-        <div className="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-lg p-6 mt-6">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-3">Next Steps</h3>
-          <ul className="space-y-2 text-neutral-700">
-            <li className="flex items-start">
-              <span className="w-2 h-2 bg-primary-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-              Review your detailed results for each skill to identify areas for improvement
-            </li>
-            <li className="flex items-start">
-              <span className="w-2 h-2 bg-primary-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-              Practice more tests to improve your weaker skills
-            </li>
-            <li className="flex items-start">
-              <span className="w-2 h-2 bg-primary-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-              Consider taking another full test to track your progress
-            </li>
-          </ul>
-        </div>
       </div>
     </div>
   )
