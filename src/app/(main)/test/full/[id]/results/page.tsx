@@ -103,14 +103,17 @@ export default function FullTestResultsPage() {
         }
       }
 
-      // Calculate overall band score
+      // Calculate overall band score only when all three skills have band scores
       const bandScores = [result.listening?.bandScore, result.reading?.bandScore, result.writing?.bandScore].filter(
         score => score !== null && score !== undefined,
       ) as number[]
 
-      if (bandScores.length > 0) {
+      // Only compute overall when we have exactly 3 band scores (listening, reading, writing)
+      if (bandScores.length === 3) {
         const averageBandScore = bandScores.reduce((sum, score) => sum + score, 0) / bandScores.length
         result.overallBandScore = Math.round(averageBandScore * 2) / 2 // Round to nearest 0.5
+      } else {
+        result.overallBandScore = null
       }
 
       // Use the latest completion time
