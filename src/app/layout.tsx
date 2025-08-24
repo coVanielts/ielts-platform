@@ -7,7 +7,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'IELTS Learning Platform',
+  title: 'Cô Vân Ielts - Hệ thống luyện thi',
   description: 'A comprehensive platform for IELTS preparation',
 }
 

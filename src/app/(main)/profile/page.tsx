@@ -128,7 +128,7 @@ export default function ProfilePage() {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-neutral-900">IELTS Platform</h1>
+                <h1 className="text-xl font-bold text-neutral-900">IELTS Mrs.Van</h1>
                 <p className="text-sm text-neutral-600">Personal Information</p>
               </div>
             </div>
@@ -316,8 +316,8 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="flex space-x-4">
-                  <button type="submit" disabled={isUpdating} className="btn btn-primary flex-1">
+                <div className="flex justify-end">
+                  <button type="submit" disabled={isUpdating} className="btn btn-primary btn-sm text-sm">
                     {isUpdating ? (
                       <>
                         <div className="loading-spinner w-4 h-4 mr-2" />
@@ -329,20 +329,6 @@ export default function ProfilePage() {
                         Update Password
                       </>
                     )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPasswordForm({
-                        currentPassword: '',
-                        newPassword: '',
-                        confirmPassword: '',
-                      })
-                      setMessage({ type: '', text: '' })
-                    }}
-                    className="btn btn-outline">
-                    Cancel
                   </button>
                 </div>
               </form>

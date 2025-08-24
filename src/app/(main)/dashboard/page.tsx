@@ -88,8 +88,8 @@ export default function DashboardPage() {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-neutral-900">IELTS Platform</h1>
-                <p className="text-sm text-neutral-600">Hệ thống luyện thi</p>
+                <h1 className="text-xl font-bold text-neutral-900">IELTS Mrs.Van</h1>
+                <p className="text-sm text-neutral-600">Practice Test Platform</p>
               </div>
             </div>
 
