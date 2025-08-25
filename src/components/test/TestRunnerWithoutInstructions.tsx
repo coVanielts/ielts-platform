@@ -1,4 +1,6 @@
 'use client'
+import AppHeader from '@/components/layout/AppHeader'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useUpsertAnswer } from '@/components/api/useAnswerMutations.api'
@@ -509,52 +511,48 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
       : testData?.questionGroups?.[currentPart - 1]
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="ielts-header sticky top-0 z-40">
-        <div className="max-w-screen-2xl mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="btn btn-outline btn-sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Link>
-              <div>
-                <h1 className="text-lg font-semibold text-neutral-900">{testData.title}</h1>
-                {testData.type !== 'speaking' && String(testData.instruction || '')?.trim().length > 0 && (
-                  <p className="text-sm text-neutral-600">{testData.instruction}</p>
+    <div className="h-screen flex flex-col overflow-hidden">
+      <AppHeader
+        sticky
+        tall
+        title={testData.title}
+        subtitle={testData.type !== 'speaking' && String(testData.instruction || '')?.trim().length > 0 ? (
+          <>{testData.instruction}</>
+        ) : undefined}
+        left={(
+          <Link href="/dashboard" className="btn btn-outline btn-sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Link>
+        )}
+        right={(
+          <>
+            {isListening && audioEnded && reviewTimeStarted && (
+              <div className="flex items-center space-x-2 text-sm bg-yellow-100 px-3 py-1 rounded">
+                <Clock className="w-4 h-4 text-yellow-600" />
+                <span className="text-yellow-800">Review time: {formatTime(reviewTimeRemaining)}</span>
+              </div>
+            )}
+            <div className="flex items-center space-x-2 text-sm">
+              <Clock className="w-4 h-4 text-neutral-600" />
+              <span className={timeRemaining < 300 ? 'text-red-600 font-medium' : 'text-neutral-600'}>
+                {formatTime(timeRemaining)}
+                {isListening && isTimerPaused && !userConfirmedAudio && (
+                  <span className="ml-2 text-xs text-orange-600 font-medium">(Paused)</span>
                 )}
-              </div>
+              </span>
             </div>
-
-            <div className="flex items-center space-x-4">
-              {isListening && audioEnded && reviewTimeStarted && (
-                <div className="flex items-center space-x-2 text-sm bg-yellow-100 px-3 py-1 rounded">
-                  <Clock className="w-4 h-4 text-yellow-600" />
-                  <span className="text-yellow-800">Review time: {formatTime(reviewTimeRemaining)}</span>
-                </div>
-              )}
-
-              <div className="flex items-center space-x-2 text-sm">
-                <Clock className="w-4 h-4 text-neutral-600" />
-                <span className={timeRemaining < 300 ? 'text-red-600 font-medium' : 'text-neutral-600'}>
-                  {formatTime(timeRemaining)}
-                  {isListening && isTimerPaused && !userConfirmedAudio && (
-                    <span className="ml-2 text-xs text-orange-600 font-medium">(Paused)</span>
-                  )}
-                </span>
-              </div>
-              <button onClick={handleSubmit} className="btn btn-primary btn-sm">
-                <Send className="w-4 h-4 mr-2" />
-                Submit Test
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+            <button onClick={handleSubmit} className="btn btn-primary btn-sm">
+              <Send className="w-4 h-4 mr-2" />
+              Submit Test
+            </button>
+          </>
+        )}
+      />
 
       {isListening && (
         <div className="bg-white border-b shadow-sm sticky top-20 z-30">
-          <div className="max-w-screen-2xl mx-auto px-4 py-4">
+          <div className="container py-4">
             <ListeningAudioPlayer
               audioRef={audioRef}
               audioUrl={fetchAudioFromDirectus(testData.audioUrl)}
@@ -567,7 +565,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
         </div>
       )}
 
-      <div className="flex-1 min-h-0">
+  <div className="flex-1 min-h-0 overflow-hidden">
         {String(testData.type).toLowerCase() === 'reading' ? (
           (() => {
             // Calculate sequential question mapping for reading
@@ -605,7 +603,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
             currentQuestion={currentQuestion}
             savingQuestions={savingQuestions}
           />
-        ) : String(testData.type).toLowerCase() === 'writing' ? (
+  ) : String(testData.type).toLowerCase() === 'writing' ? (
           <WritingTestLayout
             part={testData.parts[currentPart - 1]}
             currentQuestionGroup={0}
@@ -616,7 +614,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
           />
         ) : (
           <div className="h-full overflow-y-auto">
-            <div className="max-w-screen-2xl mx-auto px-4 py-6 pb-24">
+                <div className="container py-6 pb-24">
               {currentGroup && (
                 <QuestionGroup
                   group={{ ...currentGroup, type: String(testData.type).toLowerCase() }}
@@ -665,7 +663,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
       <nav
         className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 w-full z-50"
         aria-label="Questions">
-        <div className="max-w-screen-2xl mx-auto">
+  <div className="container">
           <div className="flex w-full overflow-x-auto justify-start gap-2">
             {(() => {
               if (testData.type === 'reading' && testData.parts) {

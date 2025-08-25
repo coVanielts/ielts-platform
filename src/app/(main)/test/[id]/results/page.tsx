@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { appPaths } from '@/constants/appPaths'
 import { normalizeAnswer } from '@/utils/tfng-answer.utils'
 import { ArrowLeft, Award, CheckCircle, Clock, PenTool, Target, TrendingUp, XCircle } from 'lucide-react'
+import AppHeader from '@/components/layout/AppHeader'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -98,27 +99,20 @@ export default function TestResultsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
       {/* Header */}
-      <header className="ielts-header">
-        <div className="container">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="btn btn-outline btn-sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Link>
-              <div>
-                <h1 className="text-lg font-semibold text-neutral-900">Test Results</h1>
-                <p className="text-sm text-neutral-600">{results.testTitle}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        title="Test Results"
+        subtitle={results.testTitle}
+        left={(
+          <Link href="/dashboard" className="btn btn-outline btn-sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Link>
+        )}
+      />
 
       {/* Main Content */}
       <main className="container py-8">
-        <div
-          className={`max-w-4xl mx-auto transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`mx-auto transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
           {/* Success Header */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">

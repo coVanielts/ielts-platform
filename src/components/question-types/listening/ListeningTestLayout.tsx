@@ -81,7 +81,7 @@ export default function ListeningTestLayout({
   if (!hasContent) {
     return (
       <div className="h-full overflow-y-auto" key={`listening-single-layout-${part.id}`}>
-        <div className="max-w-screen-2xl mx-auto px-4 py-6 pb-24">
+  <div className="container py-6 pb-24">
           {/* Current Part Title */}
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Part {displayPartNumber} of 4</h2>

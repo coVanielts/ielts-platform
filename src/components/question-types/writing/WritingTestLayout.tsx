@@ -146,11 +146,11 @@ export default function WritingTestLayout({ part, onAnswerChange, answers = {}, 
   return (
     <div
       ref={containerRef}
-      className={`flex h-full overflow-hidden ${isResizing ? 'select-none' : ''}`}
+      className={`flex h-full min-h-0 overflow-hidden ${isResizing ? 'select-none' : ''}`}
       key={`writing-layout-${part.id}`}>
       {/* Left Panel - Writing Instructions and Content */}
       <div
-        className="min-w-0 bg-white border-r border-gray-300 shadow-sm transition-all duration-150 flex flex-col"
+        className="min-w-0 min-h-0 h-full bg-white border-r border-gray-300 shadow-sm transition-all duration-150 flex flex-col"
         style={{ width: `${leftWidth}%` }}>
         {/* Fixed Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm flex-shrink-0">
@@ -160,7 +160,7 @@ export default function WritingTestLayout({ part, onAnswerChange, answers = {}, 
         </div>
 
         {/* Scrollable Content */}
-        <div ref={leftPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth">
+  <div ref={leftPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth">
           <div className="px-6 py-6 pb-20 space-y-8">
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {((part as any).question_groups || (part as any).questionGroups || []).map(
@@ -231,9 +231,9 @@ export default function WritingTestLayout({ part, onAnswerChange, answers = {}, 
       </button>
 
       {/* Right Panel - Writing Area */}
-      <div className="min-w-0 bg-gray-50 transition-all duration-150 flex flex-col" style={{ width: `${rightWidth}%` }}>
+  <div className="min-w-0 min-h-0 h-full bg-gray-50 transition-all duration-150 flex flex-col" style={{ width: `${rightWidth}%` }}>
         {/* Scrollable Content */}
-        <div ref={rightPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth">
+  <div ref={rightPanelScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth">
           <div className="px-6 py-6 pb-20">
             {/* Render All Question Groups */}
             <div className="space-y-6">

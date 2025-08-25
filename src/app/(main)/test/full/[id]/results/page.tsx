@@ -306,7 +306,7 @@ export default function FullTestResultsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+  <div className="container py-8">
         {/* Header */}
         <div className="mb-8">
           <Link href="/dashboard" className="inline-flex items-center text-neutral-600 hover:text-neutral-900 mb-4">

@@ -4,6 +4,7 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { appPaths } from '@/constants/appPaths'
 import { useTestAttempts } from '@/hooks/useTestAttempts'
 import { ArrowLeft, Calendar, Clock, FileText, Play, Plus } from 'lucide-react'
+import AppHeader from '@/components/layout/AppHeader'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
@@ -58,26 +59,20 @@ export default function TestAttemptsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
       {/* Header */}
-      <header className="ielts-header">
-        <div className="container">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="btn btn-outline btn-sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Link>
-              <div>
-                <h1 className="text-lg font-semibold text-neutral-900">Test Attempts</h1>
-                <p className="text-sm text-neutral-600">{testInfo?.name}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        title="Test Attempts"
+        subtitle={testInfo?.name}
+        left={(
+          <Link href="/dashboard" className="btn btn-outline btn-sm">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Link>
+        )}
+      />
 
       {/* Main Content */}
       <main className="container py-8">
-        <div className="max-w-4xl mx-auto">
+  <div className="container">
           {/* Test Info Card */}
           <div className="card mb-8">
             <div className="card-body">

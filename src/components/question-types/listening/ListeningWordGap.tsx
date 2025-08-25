@@ -199,7 +199,7 @@ export const ListeningWordGap: React.FC<ListeningWordGapProps> = ({
 
       {/* Main Content */}
       <div className="p-4">
-        <div className="max-w-4xl mx-auto">
+  <div className="container">
           {/* If rich content is provided, render with inline gaps */}
           {content ? (
             <div className="space-y-3">{renderTipTapWithInlineGaps((content || {}) as TTPDoc)}</div>

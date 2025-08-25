@@ -147,7 +147,7 @@ export default function FullTestPage() {
   if (showListeningInstructions) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center p-12 max-w-4xl">
+  <div className="flex flex-col items-center justify-center p-12 container">
           <div className="mb-8">
             <Clock className="w-20 h-20 text-blue-500 mx-auto" />
           </div>
@@ -182,7 +182,7 @@ export default function FullTestPage() {
   if (showReadingInstructions) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center p-12 max-w-4xl">
+  <div className="flex flex-col items-center justify-center p-12 container">
           <div className="mb-8">
             <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto">
               <span className="text-white text-3xl font-bold">📖</span>
@@ -216,7 +216,7 @@ export default function FullTestPage() {
   if (showWritingInstructions) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center p-12 max-w-4xl">
+  <div className="flex flex-col items-center justify-center p-12 container">
           <div className="mb-8">
             <div className="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center mx-auto">
               <span className="text-white text-3xl font-bold">✍️</span>
@@ -252,7 +252,7 @@ export default function FullTestPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-screen-2xl mx-auto px-4">
+  <div className="container">
           <div className="flex space-x-1">
             <div className="px-6 py-3 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
               {currentSection === 'listening' && 'Listening Test'}

@@ -145,7 +145,9 @@
 
   /* Layout Components */
   .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    /* Use a fixed max width so header and page content align vertically across pages */
+    max-width: 1320px;
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
   }
 
   .page-header {
