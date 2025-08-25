@@ -50,6 +50,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isTimerPaused, setIsTimerPaused] = useState(true) // Timer starts paused
   const [userConfirmedAudio, setUserConfirmedAudio] = useState(false)
+  const [savingQuestions, setSavingQuestions] = useState<Set<string>>(new Set())
   // Load test and auto-start
   useEffect(() => {
     const load = async () => {
@@ -324,6 +325,9 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
 
   // Save answer with per-question debounce
   const saveAnswerDebounced = (questionId: string, answer: unknown, type?: 'writing' | 'speaking') => {
+    // Add question to saving set
+    setSavingQuestions(prev => new Set(prev).add(questionId))
+    
     // Clear existing timeout for this question
     if (timeoutRefs.current[questionId]) {
       clearTimeout(timeoutRefs.current[questionId])
@@ -361,13 +365,23 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
 
         upsertAnswer(payload, {
           onSuccess: () => {
-            // Remove from pending after successful save
+            // Remove from pending and saving state after successful save
             delete pendingAnswersRef.current[questionId]
             delete timeoutRefs.current[questionId]
+            setSavingQuestions(prev => {
+              const newSet = new Set(prev)
+              newSet.delete(questionId)
+              return newSet
+            })
           },
           onError: error => {
             console.error('Failed to save answer for question:', qid, error)
             delete timeoutRefs.current[questionId]
+            setSavingQuestions(prev => {
+              const newSet = new Set(prev)
+              newSet.delete(questionId)
+              return newSet
+            })
             // Keep the current UI state on error, don't revert
           },
         })
@@ -383,11 +397,29 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
   }, [])
 
   const handleAnswerChange = (questionId: string, answer: unknown, type?: 'writing' | 'speaking') => {
+    console.log('TestRunner - handleAnswerChange:', { questionId, answer, type })
+    
     // Update UI immediately (optimistic update)
-    setAnswers(prev => ({ ...prev, [questionId]: answer }))
+    setAnswers(prev => {
+      if (answer === null || answer === undefined) {
+        // Remove the question from answers completely when answer is null/undefined
+        const newAnswers = { ...prev }
+        delete newAnswers[questionId]
+        console.log('TestRunner - removing answer:', { questionId, newAnswers })
+        return newAnswers
+      } else {
+        const newAnswers = { ...prev, [questionId]: answer }
+        console.log('TestRunner - setting answer:', { questionId, answer, newAnswers })
+        return newAnswers
+      }
+    })
 
     // Track this as a pending update
-    pendingAnswersRef.current[questionId] = answer
+    if (answer === null || answer === undefined) {
+      delete pendingAnswersRef.current[questionId]
+    } else {
+      pendingAnswersRef.current[questionId] = answer
+    }
 
     // Save to API with per-question debounce (prevents cancellation)
     saveAnswerDebounced(questionId, answer, type)
@@ -559,6 +591,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
                 answers={answers}
                 currentQuestion={currentQuestion}
                 sequentialQuestionMap={sequentialQuestionMap}
+                savingQuestions={savingQuestions}
               />
             )
           })()
@@ -570,6 +603,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
             onAnswerChange={handleAnswerChange}
             answers={answers}
             currentQuestion={currentQuestion}
+            savingQuestions={savingQuestions}
           />
         ) : String(testData.type).toLowerCase() === 'writing' ? (
           <WritingTestLayout
@@ -578,6 +612,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
             onAnswerChange={handleAnswerChange}
             answers={answers as Record<string, string>}
             currentQuestion={currentQuestion}
+            savingQuestions={savingQuestions}
           />
         ) : (
           <div className="h-full overflow-y-auto">
@@ -589,6 +624,7 @@ export default function TestRunnerWithoutInstructions({ testId, testGroupId, onC
                   isReadOnly={false}
                   currentQuestion={currentQuestion}
                   answers={answers}
+                  savingQuestions={savingQuestions}
                 />
               )}
             </div>

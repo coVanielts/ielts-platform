@@ -19,6 +19,7 @@ interface QuestionGroupProps {
   isReadOnly?: boolean
   currentQuestion?: number
   answers?: Record<string, unknown>
+  savingQuestions?: Set<string>
 }
 
 export const QuestionGroup: React.FC<QuestionGroupProps> = ({
@@ -27,6 +28,7 @@ export const QuestionGroup: React.FC<QuestionGroupProps> = ({
   isReadOnly,
   currentQuestion,
   answers,
+  savingQuestions,
 }) => {
   const questionRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
 
@@ -87,6 +89,7 @@ export const QuestionGroup: React.FC<QuestionGroupProps> = ({
           isReadOnly={isReadOnly}
           currentQuestion={currentQuestion}
           answers={answers}
+          savingQuestions={savingQuestions}
         />
       )
     default:

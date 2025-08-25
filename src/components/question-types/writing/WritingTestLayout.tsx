@@ -46,9 +46,10 @@ interface WritingTestLayoutProps {
   answers?: Record<string, string>
   currentQuestion?: number
   onQuestionChange?: (questionNumber: number) => void
+  savingQuestions?: Set<string>
 }
 
-export default function WritingTestLayout({ part, onAnswerChange, answers = {} }: WritingTestLayoutProps) {
+export default function WritingTestLayout({ part, onAnswerChange, answers = {}, savingQuestions }: WritingTestLayoutProps) {
   const { leftWidth, rightWidth, isResizing, containerRef, startResize } = useResizablePanes({
     initialLeftWidth: 50,
     minWidth: 30,

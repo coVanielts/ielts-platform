@@ -16,6 +16,7 @@ interface ListeningTestLayoutProps {
   answers?: Record<string, unknown>
   currentQuestion?: number
   onQuestionChange?: (questionNumber: number) => void
+  savingQuestions?: Set<string>
 }
 
 export default function ListeningTestLayout({
@@ -24,6 +25,7 @@ export default function ListeningTestLayout({
   onAnswerChange,
   currentQuestion,
   answers,
+  savingQuestions,
 }: ListeningTestLayoutProps) {
   const { leftWidth, rightWidth, isResizing, containerRef, startResize } = useResizablePanes({
     initialLeftWidth: 40, // Listening usually needs less space for content
@@ -96,6 +98,7 @@ export default function ListeningTestLayout({
                   isReadOnly={false}
                   currentQuestion={currentQuestion}
                   answers={answers}
+                  savingQuestions={savingQuestions}
                 />
               </div>
             ))}
@@ -234,6 +237,7 @@ export default function ListeningTestLayout({
                       isReadOnly={false}
                       currentQuestion={currentQuestion}
                       answers={answers}
+                      savingQuestions={savingQuestions}
                     />
                   </div>
                 </div>

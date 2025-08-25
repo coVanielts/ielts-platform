@@ -446,10 +446,6 @@ export default function FullTestResultsPage() {
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Accuracy:</span>
-                    <span className="font-medium">{fullTestResult.writing.percentage}%</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-neutral-600">Time Spent:</span>
                     <span className="font-medium">{fullTestResult.writing.timeSpent}</span>
                   </div>

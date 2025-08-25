@@ -17,6 +17,7 @@ interface ReadingTestLayoutProps {
   onQuestionChange?: (questionNumber: number) => void
   currentPart?: number
   sequentialQuestionMap?: Map<string, number>
+  savingQuestions?: Set<string>
 }
 
 export default function ReadingTestLayout({ 
@@ -26,7 +27,8 @@ export default function ReadingTestLayout({
   currentQuestion, 
   answers,
   currentPart,
-  sequentialQuestionMap
+  sequentialQuestionMap,
+  savingQuestions
 }: ReadingTestLayoutProps) {
   const { leftWidth, rightWidth, isResizing, containerRef, startResize } = useResizablePanes({
     initialLeftWidth: 40,
@@ -208,6 +210,7 @@ export default function ReadingTestLayout({
                       isReadOnly={false}
                       currentQuestion={currentQuestion}
                       answers={answers}
+                      savingQuestions={savingQuestions}
                     />
                   </div>
                 </div>
