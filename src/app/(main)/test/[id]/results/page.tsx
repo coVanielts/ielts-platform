@@ -243,53 +243,195 @@ export default function TestResultsPage() {
                         </h3>
                       </div>
                       <div className="card-body">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Task 1 */}
-                          <div className="space-y-4">
-                            <h4 className="text-lg font-medium text-neutral-900 border-b pb-2">Task 1</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Task Achievement</p>
-                                <p className="font-semibold text-neutral-900">{results.task_1_TA || 'N/A'}</p>
+                        {/* Task 1 Breakdown */}
+                        {(results.task_1_TA || results.task_1_CC || results.task_1_LR || results.task_1_GRA) && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-medium text-neutral-900 border-b pb-2 mb-4">Task 1</h4>
+                            
+                            {/* Task 1 Scores Row */}
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-3">Scores</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                {results.task_1_TA && (
+                                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <span className="text-xs font-medium text-blue-700">TA</span>
+                                    <span className="text-lg font-bold text-blue-800">{results.task_1_TA}</span>
+                                  </div>
+                                )}
+                                {results.task_1_CC && (
+                                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <span className="text-xs font-medium text-green-700">CC</span>
+                                    <span className="text-lg font-bold text-green-800">{results.task_1_CC}</span>
+                                  </div>
+                                )}
+                                {results.task_1_LR && (
+                                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                    <span className="text-xs font-medium text-purple-700">LR</span>
+                                    <span className="text-lg font-bold text-purple-800">{results.task_1_LR}</span>
+                                  </div>
+                                )}
+                                {results.task_1_GRA && (
+                                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                    <span className="text-xs font-medium text-orange-700">GRA</span>
+                                    <span className="text-lg font-bold text-orange-800">{results.task_1_GRA}</span>
+                                  </div>
+                                )}
                               </div>
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Coherence & Cohesion</p>
-                                <p className="font-semibold text-neutral-900">{results.task_1_CC || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Lexical Resource</p>
-                                <p className="font-semibold text-neutral-900">{results.task_1_LR || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Grammar Range & Accuracy</p>
-                                <p className="font-semibold text-neutral-900">{results.task_1_GRA || 'N/A'}</p>
+                            </div>
+                            
+                            {/* Task 1 Feedback Row */}
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-3">Feedback</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-blue-700 mb-2">TA Feedback</div>
+                                  <div className="text-xs text-blue-600">
+                                    {results.task_1_TA_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-green-50 rounded-lg border border-green-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-green-700 mb-2">CC Feedback</div>
+                                  <div className="text-xs text-green-600">
+                                    {results.task_1_CC_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-purple-700 mb-2">LR Feedback</div>
+                                  <div className="text-xs text-purple-600">
+                                    {results.task_1_LR_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-orange-700 mb-2">GRA Feedback</div>
+                                  <div className="text-xs text-orange-600">
+                                    {results.task_1_GRA_feedback || "No feedback available"}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
+                        )}
 
-                          {/* Task 2 */}
-                          <div className="space-y-4">
-                            <h4 className="text-lg font-medium text-neutral-900 border-b pb-2">Task 2</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Task Achievement</p>
-                                <p className="font-semibold text-neutral-900">{results.task_2_TA || 'N/A'}</p>
+                        {/* Task 2 Breakdown */}
+                        {(results.task_2_TA || results.task_2_CC || results.task_2_LR || results.task_2_GRA) && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-medium text-neutral-900 border-b pb-2 mb-4">Task 2</h4>
+                            
+                            {/* Task 2 Scores Row */}
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-3">Scores</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                {results.task_2_TA && (
+                                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <span className="text-xs font-medium text-blue-700">TA</span>
+                                    <span className="text-lg font-bold text-blue-800">{results.task_2_TA}</span>
+                                  </div>
+                                )}
+                                {results.task_2_CC && (
+                                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <span className="text-xs font-medium text-green-700">CC</span>
+                                    <span className="text-lg font-bold text-green-800">{results.task_2_CC}</span>
+                                  </div>
+                                )}
+                                {results.task_2_LR && (
+                                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                    <span className="text-xs font-medium text-purple-700">LR</span>
+                                    <span className="text-lg font-bold text-purple-800">{results.task_2_LR}</span>
+                                  </div>
+                                )}
+                                {results.task_2_GRA && (
+                                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                    <span className="text-xs font-medium text-orange-700">GRA</span>
+                                    <span className="text-lg font-bold text-orange-800">{results.task_2_GRA}</span>
+                                  </div>
+                                )}
                               </div>
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Coherence & Cohesion</p>
-                                <p className="font-semibold text-neutral-900">{results.task_2_CC || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Lexical Resource</p>
-                                <p className="font-semibold text-neutral-900">{results.task_2_LR || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-neutral-600 mb-1">Grammar Range & Accuracy</p>
-                                <p className="font-semibold text-neutral-900">{results.task_2_GRA || 'N/A'}</p>
+                            </div>
+                            
+                            {/* Task 2 Feedback Row */}
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-3">Feedback</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-blue-700 mb-2">TA Feedback</div>
+                                  <div className="text-xs text-blue-600">
+                                    {results.task_2_TA_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-green-50 rounded-lg border border-green-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-green-700 mb-2">CC Feedback</div>
+                                  <div className="text-xs text-green-600">
+                                    {results.task_2_CC_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-purple-700 mb-2">LR Feedback</div>
+                                  <div className="text-xs text-purple-600">
+                                    {results.task_2_LR_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-orange-700 mb-2">GRA Feedback</div>
+                                  <div className="text-xs text-orange-600">
+                                    {results.task_2_GRA_feedback || "No feedback available"}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
+
+                        {/* Fallback: Show simple layout if no detailed scores */}
+                        {!results.task_1_TA && !results.task_1_CC && !results.task_1_LR && !results.task_1_GRA && 
+                         !results.task_2_TA && !results.task_2_CC && !results.task_2_LR && !results.task_2_GRA && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Task 1 */}
+                            <div className="space-y-4">
+                              <h4 className="text-lg font-medium text-neutral-900 border-b pb-2">Task 1</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Task Achievement</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Coherence & Cohesion</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Lexical Resource</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Grammar Range & Accuracy</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Task 2 */}
+                            <div className="space-y-4">
+                              <h4 className="text-lg font-medium text-neutral-900 border-b pb-2">Task 2</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Task Achievement</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Coherence & Cohesion</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Lexical Resource</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-neutral-600 mb-1">Grammar Range & Accuracy</p>
+                                  <p className="font-semibold text-neutral-900">N/A</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Overall Band Score */}
                         <div className="mt-6 pt-6 border-t border-gray-200">
@@ -373,24 +515,95 @@ export default function TestResultsPage() {
                         </h3>
                       </div>
                       <div className="card-body">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                          <div>
-                            <p className="text-sm text-neutral-600 mb-1">Fluency & Coherence</p>
-                            <p className="font-semibold text-neutral-900">{results.FC || 'N/A'}</p>
+                        {/* Speaking Breakdown */}
+                        {(results.FC || results.LR || results.GRA || results.P) && (
+                          <div className="mb-6">
+                            
+                            {/* Speaking Scores Row */}
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-3">Scores</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                {results.FC && (
+                                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <span className="text-xs font-medium text-blue-700">FC</span>
+                                    <span className="text-lg font-bold text-blue-800">{results.FC}</span>
+                                  </div>
+                                )}
+                                {results.LR && (
+                                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <span className="text-xs font-medium text-green-700">LR</span>
+                                    <span className="text-lg font-bold text-green-800">{results.LR}</span>
+                                  </div>
+                                )}
+                                {results.GRA && (
+                                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                    <span className="text-xs font-medium text-purple-700">GRA</span>
+                                    <span className="text-lg font-bold text-purple-800">{results.GRA}</span>
+                                  </div>
+                                )}
+                                {results.P && (
+                                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                    <span className="text-xs font-medium text-orange-700">P</span>
+                                    <span className="text-lg font-bold text-orange-800">{results.P}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Speaking Feedback Row */}
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-3">Feedback</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-blue-700 mb-2">FC Feedback</div>
+                                  <div className="text-xs text-blue-600">
+                                    {results.FC_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-green-50 rounded-lg border border-green-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-green-700 mb-2">LR Feedback</div>
+                                  <div className="text-xs text-green-600">
+                                    {results.LR_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-purple-700 mb-2">GRA Feedback</div>
+                                  <div className="text-xs text-purple-600">
+                                    {results.GRA_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 min-h-[80px]">
+                                  <div className="text-xs font-medium text-orange-700 mb-2">P Feedback</div>
+                                  <div className="text-xs text-orange-600">
+                                    {results.P_feedback || "No feedback available"}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm text-neutral-600 mb-1">Lexical Resource</p>
-                            <p className="font-semibold text-neutral-900">{results.LR || 'N/A'}</p>
+                        )}
+
+                        {/* Fallback: Show simple layout if no detailed scores */}
+                        {!results.FC && !results.LR && !results.GRA && !results.P && (
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div>
+                              <p className="text-sm text-neutral-600 mb-1">Fluency & Coherence</p>
+                              <p className="font-semibold text-neutral-900">N/A</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-neutral-600 mb-1">Lexical Resource</p>
+                              <p className="font-semibold text-neutral-900">N/A</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-neutral-600 mb-1">Grammar Range & Accuracy</p>
+                              <p className="font-semibold text-neutral-900">N/A</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-neutral-600 mb-1">Pronunciation</p>
+                              <p className="font-semibold text-neutral-900">N/A</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm text-neutral-600 mb-1">Grammar Range & Accuracy</p>
-                            <p className="font-semibold text-neutral-900">{results.GRA || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-neutral-600 mb-1">Pronunciation</p>
-                            <p className="font-semibold text-neutral-900">{results.P || 'N/A'}</p>
-                          </div>
-                        </div>
+                        )}
 
                         {/* Overall Band Score */}
                         <div className="mt-6 pt-6 border-t border-gray-200">

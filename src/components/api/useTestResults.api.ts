@@ -43,15 +43,27 @@ export interface TestResult {
   task_1_CC?: number | null
   task_1_LR?: number | null
   task_1_GRA?: number | null
+  task_1_TA_feedback?: string | null
+  task_1_CC_feedback?: string | null
+  task_1_LR_feedback?: string | null
+  task_1_GRA_feedback?: string | null
   task_2_TA?: number | null
   task_2_CC?: number | null
   task_2_LR?: number | null
   task_2_GRA?: number | null
+  task_2_TA_feedback?: string | null
+  task_2_CC_feedback?: string | null
+  task_2_LR_feedback?: string | null
+  task_2_GRA_feedback?: string | null
   // Speaking specific fields
   FC?: number | null
   LR?: number | null
   GRA?: number | null
   P?: number | null
+  FC_feedback?: string | null
+  LR_feedback?: string | null
+  GRA_feedback?: string | null
+  P_feedback?: string | null
 }
 
 export const TEST_RESULTS_QUERY_KEY = 'test-results'
@@ -219,10 +231,18 @@ const fetchTestResults = async ({
           task_1_CC: resultData.task_1_CC,
           task_1_LR: resultData.task_1_LR,
           task_1_GRA: resultData.task_1_GRA,
+          task_1_TA_feedback: resultData.task_1_TA_feedback?.toString() || null,
+          task_1_CC_feedback: resultData.task_1_CC_feedback?.toString() || null,
+          task_1_LR_feedback: resultData.task_1_LR_feedback?.toString() || null,
+          task_1_GRA_feedback: resultData.task_1_GRA_feedback?.toString() || null,
           task_2_TA: resultData.task_2_TA,
           task_2_CC: resultData.task_2_CC,
           task_2_LR: resultData.task_2_LR,
           task_2_GRA: resultData.task_2_GRA,
+          task_2_TA_feedback: resultData.task_2_TA_feedback?.toString() || null,
+          task_2_CC_feedback: resultData.task_2_CC_feedback?.toString() || null,
+          task_2_LR_feedback: resultData.task_2_LR_feedback?.toString() || null,
+          task_2_GRA_feedback: resultData.task_2_GRA_feedback?.toString() || null,
         }
 
         return pendingResults
@@ -309,14 +329,26 @@ const fetchTestResults = async ({
         task_1_CC: resultData.task_1_CC,
         task_1_LR: resultData.task_1_LR,
         task_1_GRA: resultData.task_1_GRA,
+        task_1_TA_feedback: resultData.task_1_TA_feedback?.toString() || null,
+        task_1_CC_feedback: resultData.task_1_CC_feedback?.toString() || null,
+        task_1_LR_feedback: resultData.task_1_LR_feedback?.toString() || null,
+        task_1_GRA_feedback: resultData.task_1_GRA_feedback?.toString() || null,
         task_2_TA: resultData.task_2_TA,
         task_2_CC: resultData.task_2_CC,
         task_2_LR: resultData.task_2_LR,
         task_2_GRA: resultData.task_2_GRA,
+        task_2_TA_feedback: resultData.task_2_TA_feedback?.toString() || null,
+        task_2_CC_feedback: resultData.task_2_CC_feedback?.toString() || null,
+        task_2_LR_feedback: resultData.task_2_LR_feedback?.toString() || null,
+        task_2_GRA_feedback: resultData.task_2_GRA_feedback?.toString() || null,
         FC: resultData.FC,
         LR: resultData.LR,
         GRA: resultData.GRA,
         P: resultData.P,
+        FC_feedback: resultData.FC_feedback?.toString() || null,
+        LR_feedback: resultData.LR_feedback?.toString() || null,
+        GRA_feedback: resultData.GRA_feedback?.toString() || null,
+        P_feedback: resultData.P_feedback?.toString() || null,
       }
 
       return testResult

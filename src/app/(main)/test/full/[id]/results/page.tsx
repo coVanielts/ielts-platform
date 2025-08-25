@@ -38,6 +38,22 @@ interface FullTestResult {
       filename: string
       url: string
     }>
+    task_1_TA?: number | null
+    task_1_CC?: number | null
+    task_1_LR?: number | null
+    task_1_GRA?: number | null
+    task_1_TA_feedback?: string | null
+    task_1_CC_feedback?: string | null
+    task_1_LR_feedback?: string | null
+    task_1_GRA_feedback?: string | null
+    task_2_TA?: number | null
+    task_2_CC?: number | null
+    task_2_LR?: number | null
+    task_2_GRA?: number | null
+    task_2_TA_feedback?: string | null
+    task_2_CC_feedback?: string | null
+    task_2_LR_feedback?: string | null
+    task_2_GRA_feedback?: string | null
   }
   speaking?: {
     testId: number
@@ -51,6 +67,14 @@ interface FullTestResult {
       filename: string
       url: string
     }>
+    FC?: number | null
+    LR?: number | null
+    GRA?: number | null
+    P?: number | null
+    FC_feedback?: string | null
+    LR_feedback?: string | null
+    GRA_feedback?: string | null
+    P_feedback?: string | null
   }
   overallBandScore: number | null
   completedAt: string
@@ -68,6 +92,7 @@ export default function FullTestResultsPage() {
   const listeningTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'listening')?.tests_id?.id
   const readingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'reading')?.tests_id?.id
   const writingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'writing')?.tests_id?.id
+  const speakingTestId = testGroupData?.tests?.find(t => t.tests_id.type?.toLowerCase() === 'speaking')?.tests_id?.id
 
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
   const attemptParam = searchParams.get('attempt')
@@ -77,6 +102,7 @@ export default function FullTestResultsPage() {
   const { data: listeningResult } = useTestResults(listeningTestId?.toString() ?? '', testGroupId, attemptNumber)
   const { data: readingResult } = useTestResults(readingTestId?.toString() ?? '', testGroupId, attemptNumber)
   const { data: writingResult } = useTestResults(writingTestId?.toString() ?? '', testGroupId, attemptNumber)
+  const { data: speakingResult } = useTestResults(speakingTestId?.toString() ?? '', testGroupId, attemptNumber)
 
   useEffect(() => {
     if (!groupLoading && testGroupData) {
@@ -118,17 +144,54 @@ export default function FullTestResultsPage() {
           timeSpent: writingResult.timeSpent,
           completedAt: writingResult.completedAt,
           status: writingResult.bandScore !== null ? 'graded' : 'pending', // Writing usually needs manual grading
-          feedbackFiles: writingResult.feedbackFiles || []
+          feedbackFiles: writingResult.feedbackFiles || [],
+          task_1_TA: writingResult.task_1_TA,
+          task_1_CC: writingResult.task_1_CC,
+          task_1_LR: writingResult.task_1_LR,
+          task_1_GRA: writingResult.task_1_GRA,
+          task_1_TA_feedback: writingResult.task_1_TA_feedback,
+          task_1_CC_feedback: writingResult.task_1_CC_feedback,
+          task_1_LR_feedback: writingResult.task_1_LR_feedback,
+          task_1_GRA_feedback: writingResult.task_1_GRA_feedback,
+          task_2_TA: writingResult.task_2_TA,
+          task_2_CC: writingResult.task_2_CC,
+          task_2_LR: writingResult.task_2_LR,
+          task_2_GRA: writingResult.task_2_GRA,
+          task_2_TA_feedback: writingResult.task_2_TA_feedback,
+          task_2_CC_feedback: writingResult.task_2_CC_feedback,
+          task_2_LR_feedback: writingResult.task_2_LR_feedback,
+          task_2_GRA_feedback: writingResult.task_2_GRA_feedback,
         }
       }
 
-      // Calculate overall band score only when all three skills have band scores
-      const bandScores = [result.listening?.bandScore, result.reading?.bandScore, result.writing?.bandScore].filter(
+      // Process speaking results
+      if (speakingResult && speakingTestId) {
+        result.speaking = {
+          testId: speakingTestId,
+          bandScore: speakingResult.bandScore as number,
+          percentage: speakingResult.percentage,
+          timeSpent: speakingResult.timeSpent,
+          completedAt: speakingResult.completedAt,
+          status: speakingResult.bandScore !== null ? 'graded' : 'pending', // Speaking usually needs manual grading
+          feedbackFiles: speakingResult.feedbackFiles || [],
+          FC: speakingResult.FC,
+          LR: speakingResult.LR,
+          GRA: speakingResult.GRA,
+          P: speakingResult.P,
+          FC_feedback: speakingResult.FC_feedback,
+          LR_feedback: speakingResult.LR_feedback,
+          GRA_feedback: speakingResult.GRA_feedback,
+          P_feedback: speakingResult.P_feedback,
+        }
+      }
+
+      // Calculate overall band score when all skills have band scores (include speaking if available)
+      const bandScores = [result.listening?.bandScore, result.reading?.bandScore, result.writing?.bandScore, result.speaking?.bandScore].filter(
         score => score !== null && score !== undefined,
       ) as number[]
 
-      // Only compute overall when we have exactly 3 band scores (listening, reading, writing)
-      if (bandScores.length === 3) {
+      // Compute overall when we have at least 3 band scores
+      if (bandScores.length >= 3) {
         const averageBandScore = bandScores.reduce((sum, score) => sum + score, 0) / bandScores.length
         result.overallBandScore = Math.round(averageBandScore * 2) / 2 // Round to nearest 0.5
       } else {
@@ -140,6 +203,7 @@ export default function FullTestResultsPage() {
         result.listening?.completedAt,
         result.reading?.completedAt,
         result.writing?.completedAt,
+        result.speaking?.completedAt,
       ].filter(time => time) as string[]
 
       if (completionTimes.length > 0) {
@@ -153,11 +217,13 @@ export default function FullTestResultsPage() {
     listeningResult,
     readingResult,
     writingResult,
+    speakingResult,
     testGroupData,
     groupLoading,
     listeningTestId,
     readingTestId,
     writingTestId,
+    speakingTestId,
   ])
 
   const getBandScoreColor = (score: number | null) => {
@@ -270,7 +336,7 @@ export default function FullTestResultsPage() {
         )}
 
         {/* Individual Skills Results */}
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Listening */}
           <div className="bg-white rounded-lg border border-neutral-200 p-6">
             <div className="flex items-center justify-between mb-4">
@@ -392,6 +458,91 @@ export default function FullTestResultsPage() {
                   <Link
                     href={`/test/${fullTestResult.writing.testId}/results`}
                     className="block w-full text-center py-2 px-4 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium">
+                    View Detailed Results
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div className="text-center text-neutral-500 py-8">
+                <span>Not completed</span>
+              </div>
+            )}
+          </div>
+
+          {/* Speaking */}
+          <div className="bg-white rounded-lg border border-neutral-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                  />
+                </svg>
+                <h3 className="text-lg font-semibold text-neutral-900 ml-2">Speaking</h3>
+              </div>
+              {fullTestResult.speaking?.status === 'pending' && (
+                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span>
+              )}
+            </div>
+
+            {fullTestResult.speaking ? (
+              <div className="space-y-3">
+                <div
+                  className={`text-center py-3 px-4 rounded-lg ${getBandScoreColor(fullTestResult.speaking.bandScore)}`}>
+                  <div className="text-2xl font-bold">{fullTestResult.speaking.bandScore || 'N/A'}</div>
+                  <div className="text-sm">Band Score</div>
+                </div>
+
+                {/* Speaking Detailed Scores */}
+                {(fullTestResult.speaking.FC || fullTestResult.speaking.LR || fullTestResult.speaking.GRA || fullTestResult.speaking.P) && (
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-semibold text-neutral-700 uppercase tracking-wide">Detailed Scores</h5>
+                    <div className="grid grid-cols-2 gap-1">
+                      {fullTestResult.speaking.FC && (
+                        <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                          <div className="text-xs font-medium text-blue-700">FC</div>
+                          <div className="text-sm font-bold text-blue-800">{fullTestResult.speaking.FC}</div>
+                        </div>
+                      )}
+                      {fullTestResult.speaking.LR && (
+                        <div className="p-2 bg-green-50 rounded border border-green-200">
+                          <div className="text-xs font-medium text-green-700">LR</div>
+                          <div className="text-sm font-bold text-green-800">{fullTestResult.speaking.LR}</div>
+                        </div>
+                      )}
+                      {fullTestResult.speaking.GRA && (
+                        <div className="p-2 bg-purple-50 rounded border border-purple-200">
+                          <div className="text-xs font-medium text-purple-700">GRA</div>
+                          <div className="text-sm font-bold text-purple-800">{fullTestResult.speaking.GRA}</div>
+                        </div>
+                      )}
+                      {fullTestResult.speaking.P && (
+                        <div className="p-2 bg-orange-50 rounded border border-orange-200">
+                          <div className="text-xs font-medium text-orange-700">P</div>
+                          <div className="text-sm font-bold text-orange-800">{fullTestResult.speaking.P}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">Accuracy:</span>
+                    <span className="font-medium">{fullTestResult.speaking.percentage}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">Time Spent:</span>
+                    <span className="font-medium">{fullTestResult.speaking.timeSpent}</span>
+                  </div>
+                </div>
+                {canRevealAnswers && (
+                  <Link
+                    href={`/test/${fullTestResult.speaking.testId}/results`}
+                    className="block w-full text-center py-2 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium">
                     View Detailed Results
                   </Link>
                 )}
@@ -528,9 +679,119 @@ export default function FullTestResultsPage() {
                   <PenTool className="w-4 h-4 mr-2" />
                   <h4 className="font-medium text-neutral-800 text-sm">Writing</h4>
                 </div>
-                <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-                  {writingResult.bandScore ? `Band: ${writingResult.bandScore}` : 'Pending assessment'}
-                </div>
+                
+                {/* Task 1 Breakdown */}
+                {(fullTestResult.writing?.task_1_TA || fullTestResult.writing?.task_1_CC || fullTestResult.writing?.task_1_LR || fullTestResult.writing?.task_1_GRA) && (
+                  <div className="mb-4">
+                    <h5 className="text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wide">Task 1</h5>
+                    
+                    {/* Task 1 Scores Row */}
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-neutral-600 mb-1">Scores</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                        <div className="flex justify-between items-center p-2 bg-blue-50 rounded border border-blue-200">
+                          <span className="text-xs font-medium text-blue-700">TA</span>
+                          <span className="text-xs font-bold text-blue-800">{fullTestResult.writing.task_1_TA || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-green-50 rounded border border-green-200">
+                          <span className="text-xs font-medium text-green-700">CC</span>
+                          <span className="text-xs font-bold text-green-800">{fullTestResult.writing.task_1_CC || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-purple-50 rounded border border-purple-200">
+                          <span className="text-xs font-medium text-purple-700">LR</span>
+                          <span className="text-xs font-bold text-purple-800">{fullTestResult.writing.task_1_LR || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-orange-50 rounded border border-orange-200">
+                          <span className="text-xs font-medium text-orange-700">GRA</span>
+                          <span className="text-xs font-bold text-orange-800">{fullTestResult.writing.task_1_GRA || '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Task 1 Feedback Row */}
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-neutral-600 mb-1">Feedback</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                        <div className="p-2 bg-blue-50 rounded border border-blue-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">TA</div>
+                          <div className="text-xs text-blue-600">{fullTestResult.writing.task_1_TA_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-green-50 rounded border border-green-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-green-700 mb-1">CC</div>
+                          <div className="text-xs text-green-600">{fullTestResult.writing.task_1_CC_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-purple-50 rounded border border-purple-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-purple-700 mb-1">LR</div>
+                          <div className="text-xs text-purple-600">{fullTestResult.writing.task_1_LR_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-orange-50 rounded border border-orange-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-orange-700 mb-1">GRA</div>
+                          <div className="text-xs text-orange-600">{fullTestResult.writing.task_1_GRA_feedback || 'No feedback'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Task 2 Breakdown */}
+                {(fullTestResult.writing?.task_2_TA || fullTestResult.writing?.task_2_CC || fullTestResult.writing?.task_2_LR || fullTestResult.writing?.task_2_GRA) && (
+                  <div className="mb-4">
+                    <h5 className="text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wide">Task 2</h5>
+                    
+                    {/* Task 2 Scores Row */}
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-neutral-600 mb-1">Scores</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                        <div className="flex justify-between items-center p-2 bg-blue-50 rounded border border-blue-200">
+                          <span className="text-xs font-medium text-blue-700">TA</span>
+                          <span className="text-xs font-bold text-blue-800">{fullTestResult.writing.task_2_TA || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-green-50 rounded border border-green-200">
+                          <span className="text-xs font-medium text-green-700">CC</span>
+                          <span className="text-xs font-bold text-green-800">{fullTestResult.writing.task_2_CC || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-purple-50 rounded border border-purple-200">
+                          <span className="text-xs font-medium text-purple-700">LR</span>
+                          <span className="text-xs font-bold text-purple-800">{fullTestResult.writing.task_2_LR || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-orange-50 rounded border border-orange-200">
+                          <span className="text-xs font-medium text-orange-700">GRA</span>
+                          <span className="text-xs font-bold text-orange-800">{fullTestResult.writing.task_2_GRA || '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Task 2 Feedback Row */}
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-neutral-600 mb-1">Feedback</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                        <div className="p-2 bg-blue-50 rounded border border-blue-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">TA</div>
+                          <div className="text-xs text-blue-600">{fullTestResult.writing.task_2_TA_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-green-50 rounded border border-green-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-green-700 mb-1">CC</div>
+                          <div className="text-xs text-green-600">{fullTestResult.writing.task_2_CC_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-purple-50 rounded border border-purple-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-purple-700 mb-1">LR</div>
+                          <div className="text-xs text-purple-600">{fullTestResult.writing.task_2_LR_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-orange-50 rounded border border-orange-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-orange-700 mb-1">GRA</div>
+                          <div className="text-xs text-orange-600">{fullTestResult.writing.task_2_GRA_feedback || 'No feedback'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Overall Writing Status */}
+                {!fullTestResult.writing?.task_1_TA && !fullTestResult.writing?.task_2_TA && (
+                  <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                    {writingResult.bandScore ? `Band: ${writingResult.bandScore}` : 'Pending assessment'}
+                  </div>
+                )}
                 
                 {/* Feedback Files */}
                 {writingResult.feedbackFiles && writingResult.feedbackFiles.length > 0 && (
@@ -544,6 +805,104 @@ export default function FullTestResultsPage() {
                             <button
                               onClick={() => window.open(file.url, '_blank')}
                               className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                            >
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Speaking status */}
+            {speakingResult && (
+              <div className="mb-3">
+                <div className="flex items-center mb-2">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                    />
+                  </svg>
+                  <h4 className="font-medium text-neutral-800 text-sm">Speaking</h4>
+                </div>
+                
+                {/* Speaking Breakdown */}
+                {(fullTestResult.speaking?.FC || fullTestResult.speaking?.LR || fullTestResult.speaking?.GRA || fullTestResult.speaking?.P) && (
+                  <div className="mb-4">
+                    
+                    {/* Speaking Scores Row */}
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-neutral-600 mb-1">Scores</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                        <div className="flex justify-between items-center p-2 bg-blue-50 rounded border border-blue-200">
+                          <span className="text-xs font-medium text-blue-700">FC</span>
+                          <span className="text-xs font-bold text-blue-800">{fullTestResult.speaking.FC || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-green-50 rounded border border-green-200">
+                          <span className="text-xs font-medium text-green-700">LR</span>
+                          <span className="text-xs font-bold text-green-800">{fullTestResult.speaking.LR || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-purple-50 rounded border border-purple-200">
+                          <span className="text-xs font-medium text-purple-700">GRA</span>
+                          <span className="text-xs font-bold text-purple-800">{fullTestResult.speaking.GRA || '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-orange-50 rounded border border-orange-200">
+                          <span className="text-xs font-medium text-orange-700">P</span>
+                          <span className="text-xs font-bold text-orange-800">{fullTestResult.speaking.P || '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Speaking Feedback Row */}
+                    <div className="mb-3">
+                      <div className="text-xs font-medium text-neutral-600 mb-1">Feedback</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                        <div className="p-2 bg-blue-50 rounded border border-blue-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">FC</div>
+                          <div className="text-xs text-blue-600">{fullTestResult.speaking.FC_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-green-50 rounded border border-green-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-green-700 mb-1">LR</div>
+                          <div className="text-xs text-green-600">{fullTestResult.speaking.LR_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-purple-50 rounded border border-purple-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-purple-700 mb-1">GRA</div>
+                          <div className="text-xs text-purple-600">{fullTestResult.speaking.GRA_feedback || 'No feedback'}</div>
+                        </div>
+                        <div className="p-2 bg-orange-50 rounded border border-orange-200 min-h-[60px]">
+                          <div className="text-xs font-medium text-orange-700 mb-1">P</div>
+                          <div className="text-xs text-orange-600">{fullTestResult.speaking.P_feedback || 'No feedback'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Overall Speaking Status */}
+                {!fullTestResult.speaking?.FC && !fullTestResult.speaking?.LR && !fullTestResult.speaking?.GRA && !fullTestResult.speaking?.P && (
+                  <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                    {speakingResult.bandScore ? `Band: ${speakingResult.bandScore}` : 'Pending assessment'}
+                  </div>
+                )}
+                
+                {/* Feedback Files */}
+                {speakingResult.feedbackFiles && speakingResult.feedbackFiles.length > 0 && (
+                  <div className="mt-2">
+                    <h5 className="text-xs font-medium text-neutral-600 mb-1">Teacher Feedback:</h5>
+                    <div className="space-y-1">
+                      {speakingResult.feedbackFiles.map((file, index) => (
+                        <div key={file.id} className="flex items-center justify-between p-2 bg-red-50 rounded border border-red-200">
+                          <span className="text-xs text-red-700">{file.filename}</span>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => window.open(file.url, '_blank')}
+                              className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                             >
                               View
                             </button>
