@@ -259,10 +259,6 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
     onAudioConfirm?.() // Call the callback to resume timer
   }
 
-  const handleContinueCancel = () => {
-    setShowContinueDialog(false)
-    // Optionally handle cancel action (e.g., redirect or show instructions)
-  }
 
   // Show loading state
   if (isLoading) {
@@ -349,7 +345,7 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
           }`}
           disabled={!isAudioReady}
           title={
-            !userConfirmed ? 'Click "Bắt đầu" first' :
+            !userConfirmed ? 'Click "Start" first' :
             (isPlaying && disableControls) ? 'Pause not available in test mode' :
             isPlaying ? 'Pause' : 'Play'
           }
@@ -540,21 +536,16 @@ export const ListeningAudioPlayer: FC<ListeningAudioPlayerProps> = ({
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Sẵn sàng để bắt đầu?
+                Ready to start?
               </h3>
               <p className="text-sm text-gray-500 mb-6">
-                Nhấn "Bắt đầu" để phát audio và bắt đầu đếm thời gian làm bài. Timer sẽ được tạm dừng cho đến khi bạn sẵn sàng.
+                Click "Start" to play the audio and begin the test timer. The timer will remain paused until you confirm.
               </p>
-              <div className="flex space-x-3 justify-center">
-                <button
-                  onClick={handleContinueCancel}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-                  Hủy
-                </button>
+              <div className="flex justify-center">
                 <button
                   onClick={handleContinueConfirm}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  Bắt đầu
+                  Start
                 </button>
               </div>
             </div>

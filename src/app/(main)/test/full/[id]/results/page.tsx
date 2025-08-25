@@ -171,11 +171,11 @@ export default function FullTestResultsPage() {
 
   const getBandScoreLabel = (score: number | null) => {
     if (!score) return 'Not Graded'
-    if (score >= 8.5) return 'Expert User'
-    if (score >= 7.0) return 'Good User'
-    if (score >= 6.0) return 'Competent User'
-    if (score >= 5.0) return 'Modest User'
-    return 'Limited User'
+    if (score >= 8.5) return 'Expert Student'
+    if (score >= 7.0) return 'Good Student'
+    if (score >= 6.0) return 'Competent Student'
+    if (score >= 5.0) return 'Modest Student'
+    return 'Noob Student'
   }
 
   const getSkillIcon = (skill: string) => {
